@@ -59,7 +59,7 @@ fun ContentColumn(navController: NavHostController) {
                     imageVector = Icons.Default.Star,
                     contentDescription = "Idea",
                     tint = Color(0xFFFFC107),
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(60.dp)
                 )
             }
         }

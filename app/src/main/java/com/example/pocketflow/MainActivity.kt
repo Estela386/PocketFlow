@@ -34,7 +34,7 @@ fun PocketFlowApp() {
         composable("escaner"){ EscanerScreen()}
         composable("huella"){ HuellaScreen()}
         composable("ingreso"){ IngresoScreen()}
-        composable("inicio"){InicioScreen()}
+        composable("inicio"){InicioScreen(navController)}
         composable("login"){ LoginScreen() }
         composable("predicciones"){ PrediccionesScreen() }
         composable("recibo"){ ReciboScreen() }
