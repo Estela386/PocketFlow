@@ -27,17 +27,17 @@ fun PocketFlowApp() {
         startDestination = "perfil" // La primera pantalla que se muestra
     ) {
         composable("perfil") { PerfilScreen(navController) }
-        composable("categorias") { CategoriasScreen() }
-        composable("recompensas"){ RecompensasScreen()}
-        composable("analisis"){ AnalisisScreen()}
-        composable("egreso"){ EgresoScreen()}
-        composable("escaner"){ EscanerScreen()}
-        composable("huella"){ HuellaScreen()}
-        composable("ingreso"){ IngresoScreen()}
+        composable("categorias") { CategoriasScreen(navController) }
+        composable("recompensas"){ RecompensasScreen(navController)}
+        composable("analisis"){ AnalisisScreen(navController)}
+        composable("egreso"){ EgresoScreen(navController)}
+        composable("escaner"){ EscanerScreen(navController)}
+        composable("huella"){ HuellaScreen(navController)}
+        composable("ingreso"){ IngresoScreen(navController)}
         composable("inicio"){InicioScreen(navController)}
         composable("login"){ LoginScreen() }
-        composable("predicciones"){ PrediccionesScreen() }
-        composable("recibo"){ ReciboScreen() }
+        composable("predicciones"){ PrediccionesScreen(navController) }
+        composable("recibo"){ ReciboScreen(navController) }
         composable("registro"){ RegistroScreen() }
     }
 }

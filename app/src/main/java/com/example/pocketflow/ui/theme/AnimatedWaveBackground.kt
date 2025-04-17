@@ -54,7 +54,7 @@ fun WaveShapeBackground(offsetY: Float) {
         drawPath(
             path = path,
             brush = Brush.verticalGradient(
-                colors = listOf(Color(0xFFB2EBF2), Color.White)
+                colors = listOf(Color(0xFF1976D2), Color.White)
             )
         )
     }

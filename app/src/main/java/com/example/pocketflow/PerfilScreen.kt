@@ -23,16 +23,32 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.BottomNavigationBar
 
 @Composable
 fun PerfilScreen(navController: NavHostController) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedWaveBackground() // Fondo con animación
-        // Pasa el navController a ContentColumn para poder usarlo en la navegación.
-        ContentColumn(navController = navController)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+        },
+        containerColor = Color.Transparent
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            AnimatedWaveBackground() // Fondo animado
+            ContentColumn(navController = navController) // Contenido principal
+        }
     }
 }
+
 
 @Composable
 fun ContentColumn(navController: NavHostController) {
@@ -51,7 +67,7 @@ fun ContentColumn(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Acción de volver */ }) {
+            IconButton(onClick = { navController.navigate("inicio") }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Color.Black)
             }
             IconButton(onClick = { navController.navigate("recompensas") }) {
