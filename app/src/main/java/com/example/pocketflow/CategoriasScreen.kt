@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.BottomNavigationBar
+import com.example.pocketflow.ui.theme.TopBar
 
 @Composable
 fun CategoriasScreen(navController: NavHostController) {
@@ -40,7 +41,7 @@ fun CategoriasScreen(navController: NavHostController) {
         ) {
 
             AnimatedWaveBackground()
-
+            TopBar(navController)
             Column(
                 modifier = Modifier
                     .fillMaxSize()

@@ -97,7 +97,12 @@ fun HeaderSection(navController: NavHostController) {
                         .size(80.dp)
                         .clip(CircleShape)
                         .border(2.dp, Color.White, CircleShape)
+                        .clickable {
+                            // Aquí añades la lógica de navegación a la pantalla de perfil
+                            navController.navigate("perfil")
+                        }
                 )
+
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.BottomNavigationBar
+import com.example.pocketflow.ui.theme.TopBar
 
 @Composable
 fun PrediccionesScreen(navController: NavHostController) {
@@ -28,6 +29,7 @@ fun PrediccionesScreen(navController: NavHostController) {
                 .padding(paddingValues)
         ) {
             AnimatedWaveBackground()
+            TopBar(navController)
             // Aquí puedes agregar el contenido real de la pantalla de Ingreso
         }
     }

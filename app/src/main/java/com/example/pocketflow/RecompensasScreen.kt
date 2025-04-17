@@ -26,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.CallingCode
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.BottomNavigationBar
+import com.example.pocketflow.ui.theme.TopBar
 
 
 @Composable
@@ -47,6 +48,7 @@ fun RecompensasScreen(navController: NavHostController) {
                 .padding(paddingValues) // importante para no tapar el contenido con el BottomNavigationBar
         ) {
             AnimatedWaveBackground()
+            TopBar(navController)
 
             BoxWithConstraints(
                 modifier = Modifier

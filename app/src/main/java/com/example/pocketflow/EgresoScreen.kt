@@ -21,6 +21,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.BottomNavigationBar
+import com.example.pocketflow.ui.theme.TopBar
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +68,7 @@ fun EgresoScreen(navController: NavHostController) {
                 .padding(paddingValues)
         ) {
             AnimatedWaveBackground()
+            TopBar(navController)
 
             Column(
                 modifier = Modifier

@@ -67,7 +67,7 @@ fun ContentColumn(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Acción de volver */ }) {
+            IconButton(onClick = { navController.navigate("inicio") }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Color.Black)
             }
             IconButton(onClick = { navController.navigate("recompensas") }) {
