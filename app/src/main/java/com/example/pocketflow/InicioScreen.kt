@@ -34,7 +34,7 @@ fun InicioScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F1C3F))
+            .background(Color(0xFF697EB9))
     ) {
         Column(
             modifier = Modifier
@@ -98,7 +98,6 @@ fun HeaderSection(navController: NavHostController) {
                         .clip(CircleShape)
                         .border(2.dp, Color.White, CircleShape)
                         .clickable {
-                            // Aquí añades la lógica de navegación a la pantalla de perfil
                             navController.navigate("perfil")
                         }
                 )
