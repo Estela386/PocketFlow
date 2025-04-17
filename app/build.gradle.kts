@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -70,6 +71,15 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("androidx.compose.animation:animation:1.5.0") // o la versión que uses
     implementation("androidx.navigation:navigation-compose:2.5.0")
+    implementation ("androidx.compose.ui:ui-text:1.5.0")
+    implementation ("androidx.compose.ui:ui:1.5.0")
+    implementation ("androidx.compose.material3:material3:1.1.0")
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.5.0")
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
 
     // Dependencias para pruebas unitarias

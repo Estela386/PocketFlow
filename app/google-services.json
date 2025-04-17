@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "804013828359",
+    "project_id": "pocket-flow-827cf",
+    "storage_bucket": "pocket-flow-827cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804013828359:android:77e54f324d161f430cfda2",
+        "android_client_info": {
+          "package_name": "com.example.pocketflow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMOFmIJiNFa9fT031Iah6CZJnJePMq2Qs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,10 +2,8 @@ package com.example.pocketflow
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.material3.TextFieldDefaults.textFieldColors
@@ -93,17 +91,17 @@ fun InputField(
         TextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(hint) },
+            placeholder = { Text(hint, color = Color.Gray) },
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text
             ),
-            colors = textFieldColors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedPlaceholderColor = Color.Gray,
-                unfocusedPlaceholderColor = Color.Gray,
-                containerColor = Color.White.copy(alpha = 0.8f),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White.copy(alpha = 0.8f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.8f),
+                disabledContainerColor = Color.LightGray,
+                errorContainerColor = Color.White,
+                cursorColor = Color.Black,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -121,17 +119,29 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    val datePickerDialog = remember {
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
         DatePickerDialog(
             context,
-            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-                val formatted = "$dayOfMonth/${month + 1}/$year"
-                onDateSelected(formatted)
+            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+                val formattedDay = selectedDay.toString().padStart(2, '0')
+                val formattedMonth = (selectedMonth + 1).toString().padStart(2, '0')
+                val formattedDate = "$formattedDay/$formattedMonth/$selectedYear"
+                onDateSelected(formattedDate)
+                showDialog = false
             },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
+            year,
+            month,
+            day
+        ).apply {
+            datePicker.maxDate = System.currentTimeMillis()
+            show()
+        }
     }
 
     Column(
@@ -151,13 +161,13 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
             value = date,
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text("02/03/2000") },
-            colors = textFieldColors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedPlaceholderColor = Color.Gray,
-                unfocusedPlaceholderColor = Color.Gray,
-                containerColor = Color.White.copy(alpha = 0.8f),
+            placeholder = { Text("02/03/2000", color = Color.Gray) },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White.copy(alpha = 0.8f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.8f),
+                disabledContainerColor = Color.LightGray,
+                errorContainerColor = Color.White,
+                cursorColor = Color.Black,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -165,7 +175,7 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
             modifier = Modifier
                 .fillMaxWidth()
                 .height(47.dp)
-                .clickable { datePickerDialog.show() }
+                .clickable { showDialog = true }
         )
     }
 }
