@@ -1,16 +1,34 @@
 package com.example.pocketflow
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.BottomNavigationBar
 
 @Composable
-fun ReciboScreen() {
+fun ReciboScreen(navController: NavHostController) {
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedWaveBackground()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+        },
+        containerColor = Color.Transparent
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            AnimatedWaveBackground()
+            // Aquí puedes agregar el contenido real de la pantalla de Ingreso
+        }
     }
 }

@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -19,21 +17,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.BottomNavigationBar
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EgresoScreen() {
+fun EgresoScreen(navController: NavHostController) {
     val context = LocalContext.current
     var fecha by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var motivoSeleccionado by remember { mutableStateOf("") }
 
     val motivos = listOf("Pago", "Comida", "Transporte", "Entretenimiento", "Otro")
-
     val calendar = Calendar.getInstance()
     val showDatePicker = remember { mutableStateOf(false) }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     if (showDatePicker.value) {
         DatePickerDialog(
@@ -52,85 +55,44 @@ fun EgresoScreen() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedWaveBackground()
-
-        Column(
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+        },
+        containerColor = Color.Transparent
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .padding(24.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Registrar Egreso",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1C2D44),
-                modifier = Modifier.align(Alignment.Start)
-            )
+            AnimatedWaveBackground()
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Fecha
-            Text("Fecha", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
-            TextField(
-                value = fecha,
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text("dd/mm/aaaa", color = Color.Gray) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFA3CFE3),
-                    unfocusedContainerColor = Color(0xFFA3CFE3),
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    cursorColor = Color.Black
-                ),
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clickable { showDatePicker.value = true }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Cantidad
-            Text("Cantidad", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
-            TextField(
-                value = cantidad,
-                onValueChange = {
-                    if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
-                },
-                placeholder = { Text("$0.00", color = Color.Gray) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFA3CFE3),
-                    unfocusedContainerColor = Color(0xFFA3CFE3),
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    cursorColor = Color.Black
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Motivo dropdown
-            Text("Motivo", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
-            var expanded by remember { mutableStateOf(false) }
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+                    .padding(24.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Registrar Egreso",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1C2D44),
+                    modifier = Modifier.align(Alignment.Start)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Fecha
+                Text("Fecha", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
                 TextField(
-                    value = motivoSeleccionado,
+                    value = fecha,
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text("Seleccionar", color = Color.Gray) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    placeholder = { Text("dd/mm/aaaa", color = Color.Gray) },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color(0xFFA3CFE3),
                         unfocusedContainerColor = Color(0xFFA3CFE3),
@@ -139,48 +101,99 @@ fun EgresoScreen() {
                         cursorColor = Color.Black
                     ),
                     modifier = Modifier
-                        .menuAnchor()
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .clickable { showDatePicker.value = true }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Cantidad
+                Text("Cantidad", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
+                TextField(
+                    value = cantidad,
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
+                    },
+                    placeholder = { Text("$0.00", color = Color.Gray) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFA3CFE3),
+                        unfocusedContainerColor = Color(0xFFA3CFE3),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        cursorColor = Color.Black
+                    ),
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
                 )
 
-                ExposedDropdownMenu(
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Motivo Dropdown
+                Text("Motivo", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
+                var expanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onExpandedChange = { expanded = !expanded }
                 ) {
-                    motivos.forEach { motivo ->
-                        DropdownMenuItem(
-                            text = { Text(motivo) },
-                            onClick = {
-                                motivoSeleccionado = motivo
-                                expanded = false
-                            }
-                        )
+                    TextField(
+                        value = motivoSeleccionado,
+                        onValueChange = {},
+                        readOnly = true,
+                        placeholder = { Text("Seleccionar", color = Color.Gray) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFA3CFE3),
+                            unfocusedContainerColor = Color(0xFFA3CFE3),
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            cursorColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        motivos.forEach { motivo ->
+                            DropdownMenuItem(
+                                text = { Text(motivo) },
+                                onClick = {
+                                    motivoSeleccionado = motivo
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        // Lógica de registro
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2D44)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                ) {
+                    Text("Registrar", color = Color.White, fontSize = 18.sp)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    // Aquí va la lógica de registro
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2D44)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-            ) {
-                Text("Registrar", color = Color.White, fontSize = 18.sp)
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Menú inferior
-            QuickAccessMenuE(selected = "camara")
         }
     }
 }
+
 
 @Composable
 fun QuickAccessMenuE(selected: String = "") {

@@ -21,62 +21,82 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.CallingCode
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.BottomNavigationBar
 
 
 @Composable
-fun RecompensasScreen() {
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF9F9F9))
-    ) {
-        AnimatedWaveBackground() // Fondo animado
+fun RecompensasScreen(navController: NavHostController) {
 
-        val screenWidth = maxWidth
-        val circleSize = screenWidth * 0.6f
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-        Column(
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+        },
+        containerColor = Color.Transparent
+    ) { paddingValues ->
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically)
+                .padding(paddingValues) // importante para no tapar el contenido con el BottomNavigationBar
         ) {
-            Text(
-                text = "Tus Metas",
-                fontSize = 28.sp,
-                fontFamily = CallingCode,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF222222)
-            )
+            AnimatedWaveBackground()
 
-            LiquidProgressCircle(
-                progress = 0.4f,
-                modifier = Modifier.size(circleSize)
-            )
-
-            Text(
-                text = "Últimos logros completados",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF555555)
-            )
-
-            Column(
+            BoxWithConstraints(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                    .fillMaxSize()
+                    .padding(24.dp)
             ) {
-                GoalItem("No gastos innecesarios el fin de semana", true)
-                GoalItem("No comprar en línea por 15 días", true)
-                GoalItem("Usar transporte público en lugar de Uber", true)
+                val screenWidth = maxWidth
+                val circleSize = screenWidth * 0.6f
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically)
+                ) {
+                    Text(
+                        text = "Tus Metas",
+                        fontSize = 28.sp,
+                        fontFamily = CallingCode,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF222222)
+                    )
+
+                    LiquidProgressCircle(
+                        progress = 0.4f,
+                        modifier = Modifier.size(circleSize)
+                    )
+
+                    Text(
+                        text = "Últimos logros completados",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF555555)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        GoalItem("No gastos innecesarios el fin de semana", true)
+                        GoalItem("No comprar en línea por 15 días", true)
+                        GoalItem("Usar transporte público en lugar de Uber", true)
+                    }
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun LiquidProgressCircle(progress: Float, modifier: Modifier = Modifier) {
