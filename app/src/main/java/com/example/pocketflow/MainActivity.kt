@@ -24,12 +24,12 @@ fun PocketFlowApp() {
 
     NavHost(
         navController = navController,
-        startDestination = "perfil" // La primera pantalla que se muestra
+        startDestination = "registro" // La primera pantalla que se muestra
     ) {
         composable("perfil") { PerfilScreen(navController) }
         composable("categorias") { CategoriasScreen(navController) }
         composable("recompensas"){ RecompensasScreen(navController)}
-        composable("analisis"){ AnalisisScreen(navController)}
+        composable("analisis"){ AnalisisScreen()}
         composable("egreso"){ EgresoScreen(navController)}
         composable("escaner"){ EscanerScreen(navController)}
         composable("huella"){ HuellaScreen(navController)}

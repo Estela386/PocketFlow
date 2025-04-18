@@ -2,11 +2,11 @@ package com.example.pocketflow
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.material3.TextFieldDefaults.textFieldColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,17 +16,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pocketflow.data.remote.RetrofitClient
+import com.example.pocketflow.data.remote.models.RegisterRequest
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroScreen(onRegister: () -> Unit = {}) {
+fun RegistroScreen(onRegisterSuccess: () -> Unit = {}) {
+    val context = LocalContext.current
+
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedWaveBackground()
@@ -54,13 +62,53 @@ fun RegistroScreen(onRegister: () -> Unit = {}) {
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = onRegister,
+                onClick = {
+                    if (password != confirmPassword) {
+                        Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (name.isBlank() || email.isBlank() || password.isBlank() || birthDate.isBlank()) {
+                        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    isLoading = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val response = RetrofitClient.api.registerUser(
+                                RegisterRequest(
+                                    nombre = name,
+                                    correo = email,
+                                    contrasena = password,
+                                    fecha_nacimiento = birthDate
+                                )
+                            )
+                            isLoading = false
+                            if (response.isSuccessful && response.body()?.success == true) {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
+                                    onRegisterSuccess()
+                                }
+                            } else {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    Toast.makeText(context, response.body()?.message ?: "Error al registrar", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            isLoading = false
+                            CoroutineScope(Dispatchers.Main).launch {
+                                Toast.makeText(context, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                },
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1B263A)),
                 modifier = Modifier
                     .width(210.dp)
                     .height(62.dp)
             ) {
-                Text("Registrar", fontSize = 20.sp, color = Color.White)
+                Text(if (isLoading) "Registrando..." else "Registrar", fontSize = 20.sp, color = Color.White)
             }
         }
     }
@@ -179,3 +227,4 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
         )
     }
 }
+
