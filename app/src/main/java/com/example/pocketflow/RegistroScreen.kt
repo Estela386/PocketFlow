@@ -5,7 +5,6 @@ import android.widget.DatePicker
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +20,7 @@ import com.example.pocketflow.data.remote.models.RegisterRequest
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import androidx.compose.foundation.text.KeyboardOptions
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -33,7 +33,7 @@ fun RegistroScreen(onRegisterSuccess: () -> Unit = {}) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") } // formato yyyy-MM-dd
     var isLoading by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -80,7 +80,7 @@ fun RegistroScreen(onRegisterSuccess: () -> Unit = {}) {
                                     nombre = name,
                                     correo = email,
                                     contrasena = password,
-                                    fecha_nacimiento = birthDate
+                                    fecha_nacimiento = birthDate // yyyy-MM-dd
                                 )
                             )
                             isLoading = false
@@ -177,10 +177,10 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
         DatePickerDialog(
             context,
             { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                val formattedDay = selectedDay.toString().padStart(2, '0')
-                val formattedMonth = (selectedMonth + 1).toString().padStart(2, '0')
-                val formattedDate = "$formattedDay/$formattedMonth/$selectedYear"
-                onDateSelected(formattedDate)
+                val dayFormatted = selectedDay.toString().padStart(2, '0')
+                val monthFormatted = (selectedMonth + 1).toString().padStart(2, '0')
+                val isoDate = "$selectedYear-$monthFormatted-$dayFormatted"
+                onDateSelected(isoDate)
                 showDialog = false
             },
             year,
@@ -190,6 +190,14 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
             datePicker.maxDate = System.currentTimeMillis()
             show()
         }
+    }
+
+    // Mostrar al usuario la fecha en formato dd/MM/yyyy
+    val displayDate = if (date.isNotEmpty()) {
+        val parts = date.split("-")
+        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else "02/03/2000"
+    } else {
+        "02/03/2000"
     }
 
     Column(
@@ -205,26 +213,30 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
 
-        TextField(
-            value = date,
-            onValueChange = {},
-            readOnly = true,
-            placeholder = { Text("02/03/2000", color = Color.Gray) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White.copy(alpha = 0.8f),
-                unfocusedContainerColor = Color.White.copy(alpha = 0.8f),
-                disabledContainerColor = Color.LightGray,
-                errorContainerColor = Color.White,
-                cursorColor = Color.Black,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            singleLine = true,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(47.dp)
                 .clickable { showDialog = true }
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = displayDate,
+                color = if (date.isNotEmpty()) Color.Black else Color.Gray,
+                fontSize = 16.sp
+            )
+        }
+
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            color = Color.Gray,
+            thickness = 1.dp
         )
     }
 }
+
+
 
