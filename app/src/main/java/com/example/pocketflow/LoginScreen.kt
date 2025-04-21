@@ -1,8 +1,9 @@
 package com.example.pocketflow
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Login
@@ -10,18 +11,32 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.pocketflow.data.local.UserPreferences
+import com.example.pocketflow.data.remote.ApiService
+import com.example.pocketflow.data.remote.models.LoginRequest
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val userPrefs = remember { UserPreferences(context) }
+
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedWaveBackground()
 
@@ -36,8 +51,7 @@ fun LoginScreen() {
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(180.dp)
+                modifier = Modifier.size(180.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -50,9 +64,6 @@ fun LoginScreen() {
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            var email by remember { mutableStateOf("") }
-            var password by remember { mutableStateOf("") }
 
             OutlinedTextField(
                 value = email,
@@ -87,7 +98,33 @@ fun LoginScreen() {
 
             Button(
                 onClick = {
-                    // Aquí puedes colocar la navegación u otra lógica de login
+                    scope.launch {
+                        val retrofit = Retrofit.Builder()
+                            .baseUrl("http://10.0.2.2:8000/") // ⚠️ Cambia esto si usas un backend en producción
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build()
+
+                        val api = retrofit.create(ApiService::class.java)
+                        val response = api.loginUser(LoginRequest(email, password))
+
+                        if (response.isSuccessful) {
+                            val loginResponse = response.body()
+                            val token = loginResponse?.access_token ?: ""
+
+                            // Aquí deberías decodificar el JWT o recibir uid y nombre directamente del backend
+                            val uid = "uid_desde_backend" // <-- REEMPLAZA por valor real si lo envías
+                            val nombre = "nombre_desde_backend"
+
+                            userPrefs.saveUserSession(token, uid, nombre)
+
+                            Toast.makeText(context, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
+
+                            // Navegar a pantalla principal
+                            navController.navigate("inicio") // <-- Reemplaza por ruta real
+                        } else {
+                            Toast.makeText(context, "Credenciales inválidas", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,11 +140,12 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = {
-                // Navegación al registro si lo deseas
+                navController.navigate("registro") // Asegúrate que esta ruta exista
             }) {
                 Text("¿No tienes cuenta? Regístrate", color = Color(0xFF1A237E))
             }
         }
     }
 }
+
 

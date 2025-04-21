@@ -21,12 +21,13 @@ import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroScreen(onRegisterSuccess: () -> Unit = {}) {
+fun RegistroScreen(navController: NavController) {
     val context = LocalContext.current
 
     var name by remember { mutableStateOf("") }
@@ -84,14 +85,17 @@ fun RegistroScreen(onRegisterSuccess: () -> Unit = {}) {
                                 )
                             )
                             isLoading = false
-                            if (response.isSuccessful && response.body()?.success == true) {
+                            val mensaje = response.body()?.mensaje ?: ""
+                            if (response.isSuccessful && mensaje.contains("registrado correctamente", ignoreCase = true)) {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                                    onRegisterSuccess()
+                                    Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                                    navController.navigate("login") {
+                                        popUpTo("registro") { inclusive = true }
+                                    }
                                 }
                             } else {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    Toast.makeText(context, response.body()?.message ?: "Error al registrar", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, mensaje.ifBlank { "Error al registrar" }, Toast.LENGTH_SHORT).show()
                                 }
                             }
                         } catch (e: Exception) {

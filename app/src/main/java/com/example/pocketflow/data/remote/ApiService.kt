@@ -12,9 +12,9 @@ interface ApiService {
 
     // NUEVO: Registro de usuario
     @POST("/api/registro")
-    suspend fun registerUser(@Body request: RegisterRequest): Response<GenericResponse>
+    suspend fun registerUser(@Body request: RegisterRequest): Response<RegisterResponse>
 
     // NUEVO: Login de usuario
-    @POST("/api/login")
+    @POST("/api/login/auth")
     suspend fun loginUser(@Body request: LoginRequest): Response<LoginResponse>
 }
