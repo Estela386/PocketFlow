@@ -16,15 +16,20 @@ fun CategoriaItem(nombre: String) {
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF8AB4CC))
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp), // sombra suave
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF90B7C9) // Azul suave
+        )
     ) {
         Text(
             text = nombre,
             modifier = Modifier
                 .padding(16.dp),
-            color = Color.Black,
+            color = Color(0xFF000000), // Negro: texto principal
             fontSize = 18.sp
         )
     }
 }
+
+
 
