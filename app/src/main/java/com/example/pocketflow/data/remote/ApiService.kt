@@ -17,4 +17,10 @@ interface ApiService {
     // NUEVO: Login de usuario
     @POST("/api/login/auth")
     suspend fun loginUser(@Body request: LoginRequest): Response<LoginResponse>
+
+    @POST("/api/ingresos")
+    suspend fun registrarIngreso(@Body ingreso: IngresoRequest): Response<Void>
+
+    @POST("/api/egresos")
+    suspend fun registrarEgreso(@Body egreso: EgresoRequest): Response<Void>
 }

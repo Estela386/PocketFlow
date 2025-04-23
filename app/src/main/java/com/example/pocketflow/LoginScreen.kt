@@ -110,17 +110,14 @@ fun LoginScreen(navController: NavController) {
                         if (response.isSuccessful) {
                             val loginResponse = response.body()
                             val token = loginResponse?.access_token ?: ""
-
-                            // Aquí deberías decodificar el JWT o recibir uid y nombre directamente del backend
-                            val uid = "uid_desde_backend" // <-- REEMPLAZA por valor real si lo envías
-                            val nombre = "nombre_desde_backend"
+                            val uid = loginResponse?.uid ?: ""
+                            val nombre = loginResponse?.nombre ?: ""
 
                             userPrefs.saveUserSession(token, uid, nombre)
 
                             Toast.makeText(context, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
 
-                            // Navegar a pantalla principal
-                            navController.navigate("inicio") // <-- Reemplaza por ruta real
+                            navController.navigate("inicio") // <-- Reemplaza por tu pantalla principal
                         } else {
                             Toast.makeText(context, "Credenciales inválidas", Toast.LENGTH_SHORT).show()
                         }
