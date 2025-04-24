@@ -57,7 +57,6 @@ fun WaveShapeBackground(offsetY: Float) {
                 colors = listOf(
                     Color(0xFFAFD9D3), // Verde aqua suave para fondo positivo
                     Color(0xFF90B7C9), // Azul suave para equilibrio
-                    Color.White
                 )
             )
         )

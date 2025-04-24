@@ -17,4 +17,19 @@ interface ApiService {
     // NUEVO: Login de usuario
     @POST("/api/login/auth")
     suspend fun loginUser(@Body request: LoginRequest): Response<LoginResponse>
+
+    @GET("/api/categorias/categorias/{uid}")
+    suspend fun getCategorias(@Path("uid") uid: String): CategoriasWrapper
+
+    @POST("/api/categorias/categorias")
+    suspend fun agregarCategoria(@Body categoria: CategoriaRequest): Response<CategoriaResponse>
+
+    @PUT("/api/categorias/{id}/")
+    suspend fun editarCategoria(
+        @Path("id") id: Int,
+        @Body categoria: CategoriaRequest
+    ): Response<CategoriaResponse>
+
+
+
 }

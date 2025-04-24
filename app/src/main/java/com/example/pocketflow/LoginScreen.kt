@@ -89,7 +89,7 @@ fun LoginScreen(navController: NavController) {
                 shape = RoundedCornerShape(30.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF8AB4CC),
+                    focusedBorderColor = Color(0xFFB0C0C9),
                     unfocusedBorderColor = Color.LightGray
                 )
             )
@@ -112,8 +112,8 @@ fun LoginScreen(navController: NavController) {
                             val token = loginResponse?.access_token ?: ""
 
                             // Aquí deberías decodificar el JWT o recibir uid y nombre directamente del backend
-                            val uid = "uid_desde_backend" // <-- REEMPLAZA por valor real si lo envías
-                            val nombre = "nombre_desde_backend"
+                            val uid = loginResponse?.uid ?: "" // <-- REEMPLAZA por valor real si lo envías
+                            val nombre = loginResponse?.nombre ?: ""
 
                             userPrefs.saveUserSession(token, uid, nombre)
 
@@ -130,7 +130,7 @@ fun LoginScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(55.dp),
                 shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8AB4CC))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFFFFF))
             ) {
                 Icon(Icons.Default.Login, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))

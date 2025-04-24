@@ -1,7 +1,10 @@
 package com.example.pocketflow
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -24,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pocketflow.data.local.UserPreferences
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 
@@ -35,6 +40,12 @@ val PureWhite = Color(0xFFFFFFFF)
 
 @Composable
 fun PerfilScreen(navController: NavHostController) {
+    val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
+
+    val nombre = userPreferences.getNombre() ?: "Usuario desconocido"
+    val email = "correo@desconocido.com" // Puedes agregar más campos en UserPreferences para el email si lo guardaste.
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -50,13 +61,13 @@ fun PerfilScreen(navController: NavHostController) {
                 .padding(paddingValues)
         ) {
             AnimatedWaveBackground()
-            ContentColumn(navController = navController)
+            ContentColumn(navController = navController, nombre = nombre, email = email)
         }
     }
 }
 
 @Composable
-fun ContentColumn(navController: NavHostController) {
+fun ContentColumn(navController: NavHostController, nombre: String, email: String) {
     var showPasswordDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -85,21 +96,18 @@ fun ContentColumn(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        Image(
-            painter = painterResource(id = R.drawable.perfil),
-            contentDescription = "Foto de perfil",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(250.dp)
-                .clip(CircleShape)
-        )
+        Box(modifier = Modifier.clickable { navController.navigate("perfil") }) {
+            ProfileImageWithInitial(nombre, navController)
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Aquí mostrará el nombre obtenido de SharedPreferences
         Text(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = SkyBlue, fontWeight = FontWeight.Bold)) { append("Ana ") }
-                withStyle(SpanStyle(color = SkyBlue, fontWeight = FontWeight.Bold)) { append("Marmolejo") }
+                withStyle(SpanStyle(color = SkyBlue, fontWeight = FontWeight.Bold)) {
+                    append(nombre)
+                }
             },
             fontSize = 26.sp
         )
@@ -108,8 +116,9 @@ fun ContentColumn(navController: NavHostController) {
 
         ProfileFieldButton(
             icon = Icons.Default.Person,
-            text = "anamarmolejo@hotmail.com"
+            text = email
         )
+
         ProfileFieldButton(
             icon = Icons.Default.Lock,
             text = "Contraseña",
@@ -126,8 +135,14 @@ fun ContentColumn(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        val context = LocalContext.current
         OutlinedButton(
-            onClick = { /* TODO: Cerrar sesión */ },
+            onClick = {
+                // Puedes limpiar la sesión aquí.
+
+                UserPreferences(context).clearSession()
+                navController.navigate("login") { popUpTo("perfil") { inclusive = true } }
+            },
             border = BorderStroke(1.dp, SkyBlue),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = SkyBlue),
             modifier = Modifier
@@ -139,6 +154,28 @@ fun ContentColumn(navController: NavHostController) {
             Text("Cerrar Sesión", color = SoftBlack, fontSize = 18.sp)
         }
     }
+
+    @Composable
+    fun ProfileImageWithInitial(nombre: String) {
+        val primerNombre = nombre.split(" ").firstOrNull() ?: nombre
+        val inicial = primerNombre.firstOrNull()?.uppercase() ?: ""
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF8AB4CC))
+        ) {
+            Text(
+                text = inicial,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+    }
+
 
     if (showPasswordDialog) {
         PasswordChangeDialog(
