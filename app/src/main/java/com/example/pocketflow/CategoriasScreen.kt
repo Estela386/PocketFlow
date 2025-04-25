@@ -21,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
+import com.example.pocketflow.ui.theme.AzulOscuro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.CategoriasViewModel
 import com.example.pocketflow.ui.theme.TopBar
@@ -97,7 +99,7 @@ fun CategoriasScreen(navController: NavHostController) {
                     text = "Mis Categorías",
                     fontSize = 35.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A237E),
+                    color = AzulOscuro,
                     modifier = Modifier
                         .align(Alignment.Start)
                         .padding(start = 8.dp, top = 8.dp, bottom = 16.dp)
@@ -113,7 +115,7 @@ fun CategoriasScreen(navController: NavHostController) {
                                 showDeleteDialog = true
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8AB4CC)),
+                        colors = ButtonDefaults.buttonColors(containerColor = AzulClaro),
                         shape = MaterialTheme.shapes.medium,
                         modifier = Modifier
                             .weight(1f)
@@ -131,7 +133,7 @@ fun CategoriasScreen(navController: NavHostController) {
                             clasificacionCategoria = "Gastos"
                             showAddDialog = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8AB4CC)),
+                        colors = ButtonDefaults.buttonColors(containerColor = AzulClaro),
                         shape = MaterialTheme.shapes.medium,
                         modifier = Modifier
                             .weight(1f)
