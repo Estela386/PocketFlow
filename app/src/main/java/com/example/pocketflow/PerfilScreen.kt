@@ -28,7 +28,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.data.local.PerfilViewModel
 import com.example.pocketflow.data.local.UserPreferences
+import com.example.pocketflow.ui.theme.AmarilloMostaza
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.Blanco
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 
 val SkyBlue = Color(0xFF90B7C9)
@@ -44,6 +46,7 @@ fun PerfilScreen(navController: NavHostController, viewModel: PerfilViewModel = 
 
     val nombre = userPreferences.getNombre() ?: "Usuario desconocido"
     val correo by viewModel.correo.collectAsState()
+    var showEmailDialog by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -82,6 +85,8 @@ fun ContentColumn(
     viewModel: PerfilViewModel
 ) {
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showEmailDialog by remember { mutableStateOf(false) }
+    var nuevoCorreo by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     Column(
@@ -90,6 +95,7 @@ fun ContentColumn(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Botones superiores
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -116,7 +122,7 @@ fun ContentColumn(
 
         Text(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = SkyBlue, fontWeight = FontWeight.Bold)) {
+                withStyle(SpanStyle(color = Blanco, fontWeight = FontWeight.Bold)) {
                     append(nombre)
                 }
             },
@@ -125,22 +131,26 @@ fun ContentColumn(
 
         Spacer(modifier = Modifier.height(28.dp))
 
+        // Botón para editar correo
         ProfileFieldButton(
             icon = Icons.Default.Email,
             text = correo,
             onClick = {
-                // Puedes abrir un diálogo para actualizar el correo si lo deseas.
+                nuevoCorreo = correo // precargar correo actual
+                showEmailDialog = true
             }
         )
 
+        // Botón para editar contraseña
         ProfileFieldButton(
             icon = Icons.Default.Lock,
-            text = "Cambiar Contraseña",
+            text = "Contraseña",
             onClick = { showPasswordDialog = true }
         )
 
         Spacer(modifier = Modifier.height(80.dp))
 
+        // Botón categorías
         ProfileFieldButton(
             icon = Icons.Default.List,
             text = "Mis Categorías",
@@ -149,7 +159,7 @@ fun ContentColumn(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val context = LocalContext.current
+        // Botón cerrar sesión
         OutlinedButton(
             onClick = {
                 UserPreferences(context).clearSession()
@@ -158,20 +168,19 @@ fun ContentColumn(
                 }
             },
             border = BorderStroke(1.dp, SkyBlue),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = SkyBlue),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Blanco),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
         ) {
             Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión", tint = SkyBlue)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Cerrar Sesión", color = SoftBlack, fontSize = 18.sp)
+            Text("Cerrar Sesión", color = AmarilloMostaza, fontSize = 18.sp)
         }
     }
 
+    // Diálogo para actualizar contraseña
     if (showPasswordDialog) {
-        val context = LocalContext.current
-
         PasswordChangeDialog(
             onDismiss = { showPasswordDialog = false },
             onConfirm = { oldPassword, newPassword, confirmPassword ->
@@ -184,7 +193,45 @@ fun ContentColumn(
             }
         )
     }
+
+    // Diálogo para actualizar correo
+    if (showEmailDialog) {
+        AlertDialog(
+            onDismissRequest = { showEmailDialog = false },
+            title = { Text("Actualizar correo") },
+            text = {
+                Column {
+                    Text("Ingresa tu nuevo correo:")
+                    TextField(
+                        value = nuevoCorreo,
+                        onValueChange = { nuevoCorreo = it },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.actualizarCorreo(nuevoCorreo) { success ->
+                        if (success) {
+                            Toast.makeText(context, "Correo actualizado", Toast.LENGTH_SHORT).show()
+                            showEmailDialog = false
+                        } else {
+                            Toast.makeText(context, "Error al actualizar", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }) {
+                    Text("Actualizar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEmailDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
 @Composable
 fun ProfileImageWithInitial(nombre: String) {
@@ -194,13 +241,13 @@ fun ProfileImageWithInitial(nombre: String) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(80.dp)
+            .size(170.dp)
             .clip(CircleShape)
             .background(Color(0xFF8AB4CC))
     ) {
         Text(
             text = inicial,
-            fontSize = 32.sp,
+            fontSize = 120.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
         )
