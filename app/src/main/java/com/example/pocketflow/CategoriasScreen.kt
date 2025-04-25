@@ -24,7 +24,7 @@ import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.AzulOscuro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
-import com.example.pocketflow.ui.theme.CategoriasViewModel
+import com.example.pocketflow.data.local.CategoriasViewModel
 import com.example.pocketflow.ui.theme.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
