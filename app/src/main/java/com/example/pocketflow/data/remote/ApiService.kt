@@ -24,12 +24,18 @@ interface ApiService {
     @POST("/api/categorias/categorias")
     suspend fun agregarCategoria(@Body categoria: CategoriaRequest): Response<CategoriaResponse>
 
-    @PUT("/api/categorias/{id}/")
+    @PUT("/api/categorias/categorias/{uid_usuario}/{id_categoria}")
     suspend fun editarCategoria(
-        @Path("id") id: Int,
+        @Path("uid_usuario") uidUsuario: String,
+        @Path("id_categoria") idCategoria: String,
         @Body categoria: CategoriaRequest
-    ): Response<CategoriaResponse>
+    ): retrofit2.Response<CategoriaResponse>
 
+    @DELETE("/api/categorias/categorias/{uid}/{id}")
+    suspend fun eliminarCategoria(
+        @Path("uid") uid: String,
+        @Path("id") id: String
+    ): Response<Unit>
 
 
 }

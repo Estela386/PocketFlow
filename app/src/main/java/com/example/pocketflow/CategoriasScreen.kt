@@ -42,16 +42,16 @@ fun CategoriasScreen(navController: NavHostController) {
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     var nombreCategoria by remember { mutableStateOf("") }
     var descripcionCategoria by remember { mutableStateOf("") }
     var clasificacionCategoria by remember { mutableStateOf("Gastos") }
 
-    var idCategoriaSeleccionada by remember { mutableStateOf<Int?>(null) }
+    var idCategoriaSeleccionada by remember { mutableStateOf<String?>(null) }
 
     val opciones = listOf("Gastos", "Ingresos")
 
-    // ✅ Obtener el uid del usuario desde SharedPreferences
     val sharedPreferences = context.getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE)
     val uidUsuario = sharedPreferences.getString("uid_usuario", "") ?: ""
 
@@ -108,7 +108,11 @@ fun CategoriasScreen(navController: NavHostController) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
-                        onClick = { /* Acción eliminar */ },
+                        onClick = {
+                            if (idCategoriaSeleccionada != null) {
+                                showDeleteDialog = true
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8AB4CC)),
                         shape = MaterialTheme.shapes.medium,
                         modifier = Modifier
@@ -147,13 +151,17 @@ fun CategoriasScreen(navController: NavHostController) {
                             nombre = categoria.categoria,
                             descripcion = "${categoria.descripcion ?: "Sin descripción"}\nClasificación: ${categoria.clasificacion}",
                             onClick = {
+                                idCategoriaSeleccionada = categoria.id
+                                nombreCategoria = categoria.categoria
+                                descripcionCategoria = categoria.descripcion ?: ""
+                                clasificacionCategoria = categoria.clasificacion
                                 showEditDialog = true
                             }
                         )
                     }
                 }
 
-                // 🟢 Diálogo Agregar Categoría
+                // 🔵 Diálogo Agregar Categoría
                 if (showAddDialog) {
                     AlertDialog(
                         onDismissRequest = { showAddDialog = false },
@@ -229,7 +237,7 @@ fun CategoriasScreen(navController: NavHostController) {
                     )
                 }
 
-                // Diálogo Editar Categoría
+                // 🟢 Diálogo Editar Categoría
                 if (showEditDialog) {
                     AlertDialog(
                         onDismissRequest = { showEditDialog = false },
@@ -287,8 +295,13 @@ fun CategoriasScreen(navController: NavHostController) {
                         },
                         confirmButton = {
                             TextButton(onClick = {
-                                idCategoriaSeleccionada?.let {
-                                    viewModel.editarCategoria(it, nombreCategoria, descripcionCategoria, clasificacionCategoria)
+                                idCategoriaSeleccionada?.let { id ->
+                                    viewModel.editarCategoria(
+                                        id,
+                                        nombreCategoria,
+                                        descripcionCategoria,
+                                        clasificacionCategoria
+                                    )
                                 }
                                 showEditDialog = false
                             }) {
@@ -302,6 +315,32 @@ fun CategoriasScreen(navController: NavHostController) {
                         }
                     )
                 }
+
+                // 🔴 Diálogo Confirmar Eliminación
+                if (showDeleteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteDialog = false },
+                        title = { Text("Confirmar eliminación") },
+                        text = { Text("¿Estás seguro de que deseas eliminar esta categoría?") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                idCategoriaSeleccionada?.let { id ->
+                                    viewModel.eliminarCategoria(uidUsuario, id)
+                                    idCategoriaSeleccionada = null
+                                }
+                                showDeleteDialog = false
+                            }) {
+                                Text("Eliminar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDeleteDialog = false }) {
+                                Text("Cancelar")
+                            }
+                        }
+                    )
+                }
+
             }
         }
     }

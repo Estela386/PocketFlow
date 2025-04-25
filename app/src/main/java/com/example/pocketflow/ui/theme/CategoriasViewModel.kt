@@ -75,9 +75,7 @@ class CategoriasViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-
-
-    fun editarCategoria(id: Int, nombre: String, descripcion: String, clasificacion: String) {
+    fun editarCategoria(idCategoria: String, nombre: String, descripcion: String, clasificacion: String) {
         val uid = userPreferences.getUid() ?: return
 
         val categoriaEditada = CategoriaRequest(
@@ -89,15 +87,32 @@ class CategoriasViewModel(application: Application) : AndroidViewModel(applicati
 
         viewModelScope.launch {
             try {
-                val response = apiService.editarCategoria(id, categoriaEditada)
+                val response = apiService.editarCategoria(uid, idCategoria, categoriaEditada)
                 if (response.isSuccessful) {
-                    Log.d("EditarCategoria", "Categoría actualizada: ${response.body()}")
-                    cargarCategorias()
+                    Log.d("EditarCategoria", "Categoría actualizada correctamente: ${response.body()}")
+                    cargarCategorias() // Recarga las categorías después de editar
                 } else {
-                    Log.e("EditarCategoria", "Error en respuesta: ${response.errorBody()?.string()}")
+                    Log.e("EditarCategoria", "Error en la respuesta: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                Log.e("EditarCategoria", "Error al editar categoría", e)
+                Log.e("EditarCategoria", "Excepción al editar categoría", e)
+            }
+        }
+    }
+
+
+    fun eliminarCategoria(uid: String, id: String) {
+        val uid = userPreferences.getUid() ?: return
+        viewModelScope.launch {
+            try {
+                val response = apiService.eliminarCategoria(uid, id)
+                if (response.isSuccessful) {
+                    cargarCategorias()
+                } else {
+                    Log.e("CategoriasViewModel", "Error al eliminar categoría: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("CategoriasViewModel", "Excepción al eliminar categoría", e)
             }
         }
     }
