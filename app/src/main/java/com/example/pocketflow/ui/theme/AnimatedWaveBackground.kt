@@ -55,10 +55,11 @@ fun WaveShapeBackground(offsetY: Float) {
             path = path,
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    Color(0xFFAFD9D3), // Verde aqua suave para fondo positivo
-                    Color(0xFF90B7C9), // Azul suave para equilibrio
+                    AzulOscuro,
+                    AzulOscuro// parte inferior, crea contraste cálido
                 )
             )
         )
+
     }
 }

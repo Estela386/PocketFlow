@@ -161,7 +161,7 @@ fun CategoriasScreen(navController: NavHostController) {
                     }
                 }
 
-                // 🔵 Diálogo Agregar Categoría
+                //Diálogo Agregar Categoría
                 if (showAddDialog) {
                     AlertDialog(
                         onDismissRequest = { showAddDialog = false },
@@ -237,7 +237,7 @@ fun CategoriasScreen(navController: NavHostController) {
                     )
                 }
 
-                // 🟢 Diálogo Editar Categoría
+                //Diálogo Editar Categoría
                 if (showEditDialog) {
                     AlertDialog(
                         onDismissRequest = { showEditDialog = false },
@@ -316,7 +316,7 @@ fun CategoriasScreen(navController: NavHostController) {
                     )
                 }
 
-                // 🔴 Diálogo Confirmar Eliminación
+                //Diálogo Confirmar Eliminación
                 if (showDeleteDialog) {
                     AlertDialog(
                         onDismissRequest = { showDeleteDialog = false },

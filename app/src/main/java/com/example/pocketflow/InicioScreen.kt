@@ -97,7 +97,7 @@ fun HeaderSection(navController: NavHostController, nombre: String) {
                     color = Color(0xFF1C2633),
                     modifier = Modifier.weight(1f)
                 )
-                // Aquí usas la inicial en vez de una imagen:
+                //Inicial en vez de una imagen:
                 Box(modifier = Modifier.clickable { navController.navigate("perfil") }) {
                     ProfileImageWithInitial(nombre, navController)
                 }
