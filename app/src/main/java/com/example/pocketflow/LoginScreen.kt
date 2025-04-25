@@ -3,6 +3,7 @@ package com.example.pocketflow
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,7 +24,11 @@ import androidx.navigation.NavController
 import com.example.pocketflow.data.local.UserPreferences
 import com.example.pocketflow.data.remote.ApiService
 import com.example.pocketflow.data.remote.models.LoginRequest
+import com.example.pocketflow.ui.theme.AmarilloMostaza
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
+import com.example.pocketflow.ui.theme.AzulOscuro
+import com.example.pocketflow.ui.theme.Blanco
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -43,6 +48,7 @@ fun LoginScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(AzulOscuro) // <- fondo aquí
                 .padding(horizontal = 32.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -51,16 +57,16 @@ fun LoginScreen(navController: NavController) {
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(180.dp)
+                modifier = Modifier.size(250.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "Bienvenido a PocketFlow",
-                fontSize = 24.sp,
+                text = "Login",
+                fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A237E)
+                color = AzulClaro
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -70,11 +76,18 @@ fun LoginScreen(navController: NavController) {
                 onValueChange = { email = it },
                 label = { Text("Correo electrónico") },
                 singleLine = true,
-                shape = RoundedCornerShape(30.dp),
+                shape = RoundedCornerShape(40.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF8AB4CC),
-                    unfocusedBorderColor = Color.LightGray
+                    focusedTextColor = Blanco,
+                    unfocusedTextColor = Blanco,
+                    focusedBorderColor = AmarilloMostaza,
+                    unfocusedBorderColor = Blanco,
+                    focusedLabelColor = AmarilloMostaza,
+                    unfocusedLabelColor = Blanco,
+                    cursorColor = AmarilloMostaza,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent
                 )
             )
 
@@ -86,11 +99,18 @@ fun LoginScreen(navController: NavController) {
                 label = { Text("Contraseña") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
-                shape = RoundedCornerShape(30.dp),
+                shape = RoundedCornerShape(40.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF8AB4CC),
-                    unfocusedBorderColor = Color.LightGray
+                    focusedTextColor = Blanco,
+                    unfocusedTextColor = Blanco,
+                    focusedBorderColor = AmarilloMostaza,
+                    unfocusedBorderColor = Blanco,
+                    focusedLabelColor = AmarilloMostaza,
+                    unfocusedLabelColor = Blanco,
+                    cursorColor = AmarilloMostaza,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent
                 )
             )
 
@@ -110,7 +130,13 @@ fun LoginScreen(navController: NavController) {
                         if (response.isSuccessful) {
                             val loginResponse = response.body()
                             val token = loginResponse?.access_token ?: ""
+<<<<<<< HEAD
                             val uid = loginResponse?.uid ?: ""
+=======
+
+                            // Aquí deberías decodificar el JWT o recibir uid y nombre directamente del backend
+                            val uid = loginResponse?.uid ?: "" // <-- REEMPLAZA por valor real si lo envías
+>>>>>>> eca6a8d86c4dc3b3a3a9c4e3cbea5d6bd7b56be8
                             val nombre = loginResponse?.nombre ?: ""
 
                             userPrefs.saveUserSession(token, uid, nombre)
@@ -127,7 +153,7 @@ fun LoginScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(55.dp),
                 shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8AB4CC))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFFFFF))
             ) {
                 Icon(Icons.Default.Login, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
@@ -137,9 +163,9 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = {
-                navController.navigate("registro") // Asegúrate que esta ruta exista
+                navController.navigate("registro")
             }) {
-                Text("¿No tienes cuenta? Regístrate", color = Color(0xFF1A237E))
+                Text("¿No tienes cuenta? Regístrate", color = AmarilloMostaza, fontSize = 15.sp,)
             }
         }
     }

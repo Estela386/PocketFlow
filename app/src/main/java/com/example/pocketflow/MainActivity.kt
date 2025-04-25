@@ -29,7 +29,7 @@ fun PocketFlowApp() {
         composable("perfil") {PerfilScreen(navController)}
         composable("categorias") {CategoriasScreen(navController)}
         composable("recompensas"){RecompensasScreen(navController)}
-        composable("analisis"){AnalisisScreen()}
+        composable("analisis"){AnalisisScreen(navController)}
         composable("egreso"){EgresoScreen(navController)}
         composable("escaner"){EscanerScreen(navController)}
         composable("huella"){HuellaScreen(navController)}

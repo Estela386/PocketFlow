@@ -3,8 +3,11 @@ package com.example.pocketflow
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +25,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.navigation.NavController
+import com.example.pocketflow.ui.theme.AmarilloMostaza
+import com.example.pocketflow.ui.theme.AzulClaro
+import com.example.pocketflow.ui.theme.AzulOscuro
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -53,6 +59,8 @@ fun RegistroScreen(navController: NavController) {
                 color = Color(0xFF1C2D44),
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+
+            Spacer(modifier = Modifier.weight(.5f))
 
             InputField("NOMBRE", name, { name = it }, hint = "Ej: Ana Marmolejo")
             InputField("CORREO", email, { email = it }, hint = "anamarmolejo@hotmail.com")
@@ -107,12 +115,13 @@ fun RegistroScreen(navController: NavController) {
                     }
                 },
                 enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1B263A)),
+                colors = ButtonDefaults.buttonColors(containerColor = AmarilloMostaza),
+
                 modifier = Modifier
                     .width(210.dp)
                     .height(62.dp)
             ) {
-                Text(if (isLoading) "Registrando..." else "Registrar", fontSize = 20.sp, color = Color.White)
+                Text(if (isLoading) "Registrando..." else "Registrar", fontSize = 20.sp, color = AzulOscuro)
             }
         }
     }
@@ -134,75 +143,63 @@ fun InputField(
     ) {
         Text(
             text = label,
-            color = Color(0xFF1C2D44),
+            color = AzulClaro,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
 
-        TextField(
+        OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            label = { Text(label) },
             placeholder = { Text(hint, color = Color.Gray) },
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text
             ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White.copy(alpha = 0.8f),
-                unfocusedContainerColor = Color.White.copy(alpha = 0.8f),
-                disabledContainerColor = Color.LightGray,
-                errorContainerColor = Color.White,
-                cursorColor = Color.Black,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+            singleLine = false,
+            shape = RoundedCornerShape(40.dp), // Forma redondeada del borde
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = AmarilloMostaza, // Color AmarilloMostaza
+                unfocusedBorderColor = Color.White,
+                focusedLabelColor = AmarilloMostaza, // Color AmarilloMostaza
+                unfocusedLabelColor = Color.White,
+                cursorColor = AmarilloMostaza, // Color AmarilloMostaza
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent
             ),
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(47.dp)
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Unit) {
+fun DatePickerField(
+    label: String,
+    date: String,
+    onDateSelected: (String) -> Unit
+) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
-
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
 
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
-        DatePickerDialog(
-            context,
-            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                val dayFormatted = selectedDay.toString().padStart(2, '0')
-                val monthFormatted = (selectedMonth + 1).toString().padStart(2, '0')
-                val isoDate = "$selectedYear-$monthFormatted-$dayFormatted"
-                onDateSelected(isoDate)
-                showDialog = false
-            },
-            year,
-            month,
-            day
-        ).apply {
+        DatePickerDialog(context, { _, y, m, d ->
+            val isoDate = "%04d-%02d-%02d".format(y, m + 1, d)
+            onDateSelected(isoDate)
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).apply {
             datePicker.maxDate = System.currentTimeMillis()
-            show()
-        }
+        }.show()
+        showDialog = false
     }
 
-    // Mostrar al usuario la fecha en formato dd/MM/yyyy
-    val displayDate = if (date.isNotEmpty()) {
-        val parts = date.split("-")
-        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else "02/03/2000"
-    } else {
-        "02/03/2000"
-    }
+    val displayDate = date.takeIf { it.contains("-") }?.split("-")?.let {
+        "${it[2]}/${it[1]}/${it[0]}"
+    } ?: ""
 
     Column(
         modifier = Modifier
@@ -211,33 +208,33 @@ fun DatePickerField(label: String, date: String, onDateSelected: (String) -> Uni
     ) {
         Text(
             text = label,
-            color = Color(0xFF1C2D44),
+            color = AzulClaro,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
 
-        Box(
+        OutlinedTextField(
+            value = displayDate,
+            onValueChange = {},
+            placeholder = { Text("Seleccionar fecha", color = Color.Gray) },
+            readOnly = true,
+            singleLine = true,
+            shape = RoundedCornerShape(40.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = AmarilloMostaza,
+                unfocusedBorderColor = Color.White,
+                focusedLabelColor = AmarilloMostaza,
+                unfocusedLabelColor = Color.White,
+                cursorColor = AmarilloMostaza,
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent
+            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(47.dp)
-                .clickable { showDialog = true }
-                .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = displayDate,
-                color = if (date.isNotEmpty()) Color.Black else Color.Gray,
-                fontSize = 16.sp
-            )
-        }
-
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            color = Color.Gray,
-            thickness = 1.dp
+                .clickable { showDialog = true } // Ahora aquí el clic
         )
     }
 }

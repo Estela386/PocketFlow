@@ -18,9 +18,32 @@ interface ApiService {
     @POST("/api/login/auth")
     suspend fun loginUser(@Body request: LoginRequest): Response<LoginResponse>
 
+<<<<<<< HEAD
     @POST("/api/ingresos")
     suspend fun registrarIngreso(@Body ingreso: IngresoRequest): Response<Void>
 
     @POST("/api/egresos")
     suspend fun registrarEgreso(@Body egreso: EgresoRequest): Response<Void>
+=======
+    @GET("/api/categorias/categorias/{uid}")
+    suspend fun getCategorias(@Path("uid") uid: String): CategoriasWrapper
+
+    @POST("/api/categorias/categorias")
+    suspend fun agregarCategoria(@Body categoria: CategoriaRequest): Response<CategoriaResponse>
+
+    @PUT("/api/categorias/categorias/{uid_usuario}/{id_categoria}")
+    suspend fun editarCategoria(
+        @Path("uid_usuario") uidUsuario: String,
+        @Path("id_categoria") idCategoria: String,
+        @Body categoria: CategoriaRequest
+    ): retrofit2.Response<CategoriaResponse>
+
+    @DELETE("/api/categorias/categorias/{uid}/{id}")
+    suspend fun eliminarCategoria(
+        @Path("uid") uid: String,
+        @Path("id") id: String
+    ): Response<Unit>
+
+
+>>>>>>> eca6a8d86c4dc3b3a3a9c4e3cbea5d6bd7b56be8
 }
