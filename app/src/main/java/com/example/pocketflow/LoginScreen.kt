@@ -130,13 +130,8 @@ fun LoginScreen(navController: NavController) {
                         if (response.isSuccessful) {
                             val loginResponse = response.body()
                             val token = loginResponse?.access_token ?: ""
-<<<<<<< HEAD
-                            val uid = loginResponse?.uid ?: ""
-=======
-
                             // Aquí deberías decodificar el JWT o recibir uid y nombre directamente del backend
                             val uid = loginResponse?.uid ?: "" // <-- REEMPLAZA por valor real si lo envías
->>>>>>> eca6a8d86c4dc3b3a3a9c4e3cbea5d6bd7b56be8
                             val nombre = loginResponse?.nombre ?: ""
 
                             userPrefs.saveUserSession(token, uid, nombre)

@@ -18,13 +18,12 @@ interface ApiService {
     @POST("/api/login/auth")
     suspend fun loginUser(@Body request: LoginRequest): Response<LoginResponse>
 
-<<<<<<< HEAD
     @POST("/api/ingresos")
     suspend fun registrarIngreso(@Body ingreso: IngresoRequest): Response<Void>
 
     @POST("/api/egresos")
     suspend fun registrarEgreso(@Body egreso: EgresoRequest): Response<Void>
-=======
+
     @GET("/api/categorias/categorias/{uid}")
     suspend fun getCategorias(@Path("uid") uid: String): CategoriasWrapper
 
@@ -44,6 +43,4 @@ interface ApiService {
         @Path("id") id: String
     ): Response<Unit>
 
-
->>>>>>> eca6a8d86c4dc3b3a3a9c4e3cbea5d6bd7b56be8
 }
