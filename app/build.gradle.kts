@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("androidx.compose.animation:animation:1.5.0") // o la versión que uses
     implementation("androidx.navigation:navigation-compose:2.5.0")
@@ -80,15 +81,31 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
+    implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
+
+
 
     //Para conectar con API
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10")
 
+
+    // ML Kit - Reconocimiento de texto
+    implementation("com.google.mlkit:text-recognition:16.0.0")
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation("androidx.camera:camera-camera2:1.3.2")
+
+    // Permiso para acceder a la galeria
+    implementation ("androidx.activity:activity-compose:1.8.0")
+
+
+
     // Dependencias para pruebas unitarias
     testImplementation(libs.junit)
+
 
     // Dependencias para pruebas de UI en Android
     androidTestImplementation(libs.androidx.junit)
@@ -96,8 +113,10 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
+
     // Dependencias para el desarrollo y debugging de Compose
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 
 }

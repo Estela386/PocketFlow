@@ -3,10 +3,11 @@ package com.example.pocketflow
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.navigation.NavHostController
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 
 @Composable
-fun AnalisisScreen() {
+fun AnalisisScreen(navController: NavHostController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedWaveBackground()

@@ -8,3 +8,4 @@ interface ApiService {
     @GET("analisis/")
     suspend fun getAnalisis(): Response<AnalisisData>
 }
+
