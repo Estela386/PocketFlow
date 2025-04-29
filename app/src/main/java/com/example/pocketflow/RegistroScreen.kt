@@ -145,7 +145,7 @@ fun InputField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text(label) },
+//            label = { Text(label) },
             placeholder = { Text(hint, color = Color.Gray) },
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions.Default.copy(

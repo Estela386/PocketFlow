@@ -24,7 +24,8 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
     val correo: StateFlow<String> = _correo
 
     private val apiService: ApiService = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8000") // Reemplaza por tu IP o URL real si es necesario
+//        .baseUrl("http://10.0.2.2:8000") // Reemplaza por tu IP o URL real si es necesario
+        .baseUrl("http://127.0.0.1:8000/") // Cambia por tu IP local si hace falta
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiService::class.java)
