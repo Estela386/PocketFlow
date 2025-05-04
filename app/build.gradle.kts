@@ -86,6 +86,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10")
+    implementation(libs.androidx.annotation)
+    implementation(libs.firebase.crashlytics.buildtools)
 
     // Dependencias para pruebas unitarias
     testImplementation(libs.junit)
@@ -99,5 +101,10 @@ dependencies {
     // Dependencias para el desarrollo y debugging de Compose
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
 
 }

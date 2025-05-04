@@ -1,8 +1,7 @@
 package com.example.pocketflow
 
-import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,19 +16,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pocketflow.data.local.PerfilViewModel
 import com.example.pocketflow.data.local.UserPreferences
+import com.example.pocketflow.ui.theme.AmarilloMostaza
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.Blanco
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 
 val SkyBlue = Color(0xFF90B7C9)
@@ -39,15 +40,20 @@ val SoftBlack = Color(0xFF1A1A1A)
 val PureWhite = Color(0xFFFFFFFF)
 
 @Composable
-fun PerfilScreen(navController: NavHostController) {
+fun PerfilScreen(navController: NavHostController, viewModel: PerfilViewModel = viewModel()) {
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
 
     val nombre = userPreferences.getNombre() ?: "Usuario desconocido"
-    val email = "correo@desconocido.com" // Puedes agregar más campos en UserPreferences para el email si lo guardaste.
+    val correo by viewModel.correo.collectAsState()
+    var showEmailDialog by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    LaunchedEffect(Unit) {
+        viewModel.obtenerCorreo()
+    }
 
     Scaffold(
         bottomBar = {
@@ -61,14 +67,27 @@ fun PerfilScreen(navController: NavHostController) {
                 .padding(paddingValues)
         ) {
             AnimatedWaveBackground()
-            ContentColumn(navController = navController, nombre = nombre, email = email)
+            ContentColumn(
+                navController = navController,
+                nombre = nombre,
+                correo = correo,
+                viewModel = viewModel
+            )
         }
     }
 }
 
 @Composable
-fun ContentColumn(navController: NavHostController, nombre: String, email: String) {
+fun ContentColumn(
+    navController: NavHostController,
+    nombre: String,
+    correo: String,
+    viewModel: PerfilViewModel
+) {
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showEmailDialog by remember { mutableStateOf(false) }
+    var nuevoCorreo by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -76,6 +95,7 @@ fun ContentColumn(navController: NavHostController, nombre: String, email: Strin
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Botones superiores
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -96,16 +116,13 @@ fun ContentColumn(navController: NavHostController, nombre: String, email: Strin
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        Box(modifier = Modifier.clickable { navController.navigate("perfil") }) {
-            ProfileImageWithInitial(nombre, navController)
-        }
+        ProfileImageWithInitial(nombre)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Aquí mostrará el nombre obtenido de SharedPreferences
         Text(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = SkyBlue, fontWeight = FontWeight.Bold)) {
+                withStyle(SpanStyle(color = Blanco, fontWeight = FontWeight.Bold)) {
                     append(nombre)
                 }
             },
@@ -114,11 +131,17 @@ fun ContentColumn(navController: NavHostController, nombre: String, email: Strin
 
         Spacer(modifier = Modifier.height(28.dp))
 
+        // Botón para editar correo
         ProfileFieldButton(
-            icon = Icons.Default.Person,
-            text = email
+            icon = Icons.Default.Email,
+            text = correo,
+            onClick = {
+                nuevoCorreo = correo // precargar correo actual
+                showEmailDialog = true
+            }
         )
 
+        // Botón para editar contraseña
         ProfileFieldButton(
             icon = Icons.Default.Lock,
             text = "Contraseña",
@@ -127,6 +150,7 @@ fun ContentColumn(navController: NavHostController, nombre: String, email: Strin
 
         Spacer(modifier = Modifier.height(80.dp))
 
+        // Botón categorías
         ProfileFieldButton(
             icon = Icons.Default.List,
             text = "Mis Categorías",
@@ -135,59 +159,97 @@ fun ContentColumn(navController: NavHostController, nombre: String, email: Strin
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val context = LocalContext.current
+        // Botón cerrar sesión
         OutlinedButton(
             onClick = {
-                // Puedes limpiar la sesión aquí.
-
                 UserPreferences(context).clearSession()
-                navController.navigate("login") { popUpTo("perfil") { inclusive = true } }
+                navController.navigate("login") {
+                    popUpTo("perfil") { inclusive = true }
+                }
             },
             border = BorderStroke(1.dp, SkyBlue),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = SkyBlue),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Blanco),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
         ) {
             Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión", tint = SkyBlue)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Cerrar Sesión", color = SoftBlack, fontSize = 18.sp)
+            Text("Cerrar Sesión", color = AmarilloMostaza, fontSize = 18.sp)
         }
     }
 
-    @Composable
-    fun ProfileImageWithInitial(nombre: String) {
-        val primerNombre = nombre.split(" ").firstOrNull() ?: nombre
-        val inicial = primerNombre.firstOrNull()?.uppercase() ?: ""
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF8AB4CC))
-        ) {
-            Text(
-                text = inicial,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
-    }
-
-
+    // Diálogo para actualizar contraseña
     if (showPasswordDialog) {
         PasswordChangeDialog(
             onDismiss = { showPasswordDialog = false },
             onConfirm = { oldPassword, newPassword, confirmPassword ->
                 if (newPassword == confirmPassword) {
-                    println("Contraseña actual: $oldPassword, Nueva: $newPassword")
+                    viewModel.actualizarContrasena(oldPassword, newPassword)
                 } else {
-                    println("Las contraseñas no coinciden.")
+                    Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
                 }
                 showPasswordDialog = false
             }
+        )
+    }
+
+    // Diálogo para actualizar correo
+    if (showEmailDialog) {
+        AlertDialog(
+            onDismissRequest = { showEmailDialog = false },
+            title = { Text("Actualizar correo") },
+            text = {
+                Column {
+                    Text("Ingresa tu nuevo correo:")
+                    TextField(
+                        value = nuevoCorreo,
+                        onValueChange = { nuevoCorreo = it },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.actualizarCorreo(nuevoCorreo) { success ->
+                        if (success) {
+                            Toast.makeText(context, "Correo actualizado", Toast.LENGTH_SHORT).show()
+                            showEmailDialog = false
+                        } else {
+                            Toast.makeText(context, "Error al actualizar", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }) {
+                    Text("Actualizar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEmailDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+}
+
+
+@Composable
+fun ProfileImageWithInitial(nombre: String) {
+    val primerNombre = nombre.split(" ").firstOrNull() ?: nombre
+    val inicial = primerNombre.firstOrNull()?.uppercase() ?: ""
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(170.dp)
+            .clip(CircleShape)
+            .background(Color(0xFF8AB4CC))
+    ) {
+        Text(
+            text = inicial,
+            fontSize = 120.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
         )
     }
 }
@@ -200,12 +262,22 @@ fun PasswordChangeDialog(
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = { onConfirm(currentPassword, newPassword, confirmPassword); onDismiss() },
-                colors = ButtonDefaults.buttonColors(containerColor = Mint)) {
+            Button(
+                onClick = {
+                    if (newPassword == confirmPassword) {
+                        errorMessage = null
+                        onConfirm(currentPassword, newPassword, confirmPassword)
+                    } else {
+                        errorMessage = "Las contraseñas no coinciden"
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Mint)
+            ) {
                 Text("Guardar", color = SoftBlack)
             }
         },
@@ -217,11 +289,34 @@ fun PasswordChangeDialog(
         title = { Text("Cambiar Contraseña", color = SoftBlack) },
         text = {
             Column {
-                OutlinedTextField(value = currentPassword, onValueChange = { currentPassword = it }, label = { Text("Contraseña actual") }, singleLine = true)
+                OutlinedTextField(
+                    value = currentPassword,
+                    onValueChange = { currentPassword = it },
+                    label = { Text("Contraseña actual") },
+                    singleLine = true
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = newPassword, onValueChange = { newPassword = it }, label = { Text("Nueva contraseña") }, singleLine = true)
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text("Nueva contraseña") },
+                    singleLine = true
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = { Text("Confirmar nueva contraseña") }, singleLine = true)
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text("Confirmar nueva contraseña") },
+                    singleLine = true
+                )
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         },
         shape = RoundedCornerShape(16.dp),
@@ -242,10 +337,11 @@ fun ProfileFieldButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .padding(vertical = 8.dp)
+            .padding(vertical = 6.dp)
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = SoftBlack)
+        Icon(icon, contentDescription = text, tint = SoftBlack)
         Spacer(modifier = Modifier.width(12.dp))
         Text(text, color = SoftBlack, fontSize = 18.sp)
     }
 }
+

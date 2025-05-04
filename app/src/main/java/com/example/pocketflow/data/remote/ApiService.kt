@@ -43,4 +43,15 @@ interface ApiService {
         @Path("id") id: String
     ): Response<Unit>
 
+    @PUT("/api/perfil/actualizar-contrasena")
+    suspend fun actualizarContrasena(@Body request: ActualizarContrasenaRequest): Response<Map<String, String>>
+
+    @GET("/api/perfil/correo")
+    suspend fun obtenerCorreo(
+        @Query("uid") uid: String
+    ): ObtenerCorreoResponse
+
+    @PUT("/api/perfil/actualizar-correo")
+    suspend fun actualizarCorreo(@Body request: ActualizarCorreoRequest): retrofit2.Response<Void>
+
 }

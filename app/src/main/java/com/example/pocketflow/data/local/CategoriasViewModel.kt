@@ -1,14 +1,12 @@
-package com.example.pocketflow.ui.theme
+package com.example.pocketflow.data.local
 
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.*
-import com.example.pocketflow.data.local.UserPreferences
 import com.example.pocketflow.data.remote.ApiService
 import com.example.pocketflow.data.remote.models.CategoriaRequest
 import com.example.pocketflow.data.remote.models.CategoriaResponse
-import com.example.pocketflow.data.remote.models.CategoriasWrapper
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,7 +19,8 @@ class CategoriasViewModel(application: Application) : AndroidViewModel(applicati
     private val userPreferences = UserPreferences(application)
 
     private val apiService: ApiService = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8000") // Reemplaza con tu URL real
+//        .baseUrl("http://10.0.2.2:8000") // Reemplaza con tu URL real
+        .baseUrl("http://127.0.0.1:8000/") // Cambia por tu IP local si hace falta
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiService::class.java)
