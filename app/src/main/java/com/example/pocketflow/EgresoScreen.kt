@@ -167,7 +167,7 @@ fun EgresoScreen(navController: NavHostController) {
 
                         scope.launch {
                             try {
-                                val response = RetrofitClient.api.registrarEgreso(egreso)
+                                val response = RetrofitClient.api.xregistrarEgreso(egreso)
                                 if (response.isSuccessful) {
                                     snackbarHostState.showSnackbar("Egreso registrado correctamente")
                                     cantidad = ""
