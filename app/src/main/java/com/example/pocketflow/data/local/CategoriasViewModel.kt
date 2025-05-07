@@ -19,8 +19,8 @@ class CategoriasViewModel(application: Application) : AndroidViewModel(applicati
     private val userPreferences = UserPreferences(application)
 
     private val apiService: ApiService = Retrofit.Builder()
-//        .baseUrl("http://10.0.2.2:8000") // Reemplaza con tu URL real
-        .baseUrl("http://127.0.0.1:8000/") // Cambia por tu IP local si hace falta
+        .baseUrl("http://10.0.2.2:8000") // Reemplaza con tu URL real
+//        .baseUrl("http://127.0.0.1:8000/") // Cambia por tu IP local si hace falta
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiService::class.java)

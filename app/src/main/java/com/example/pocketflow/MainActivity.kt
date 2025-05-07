@@ -8,6 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import com.example.pocketflow.data.remote.ApiService
+import com.example.pocketflow.data.remote.RetrofitClient
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +33,11 @@ fun PocketFlowApp() {
         composable("perfil") {PerfilScreen(navController)}
         composable("categorias") {CategoriasScreen(navController)}
         composable("recompensas"){RecompensasScreen(navController)}
-        composable("analisis"){AnalisisScreen(navController)}
+        composable("analisis") {
+            val context = LocalContext.current
+            val apiService = RetrofitClient.api
+            AnalisisScreen(navController, apiService, context)
+        }
         composable("egreso"){EgresoScreen(navController)}
         composable("escaner"){EscanerScreen(navController)}
         composable("huella"){HuellaScreen(navController)}

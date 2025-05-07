@@ -2,21 +2,16 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-<<<<<<< HEAD
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-=======
-      <SelectionState runConfigName="Pocket Flow">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-04-28T23:24:43.613739300Z">
+        <DropdownSelection timestamp="2025-05-07T13:50:37.384892800Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CXA3KHJ0L" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\tigge\.android\avd\Medium_Phone_API_30.avd" />
             </handle>
           </Target>
         </DropdownSelection>
         <DialogSelection />
->>>>>>> 8245d2e1328932e942aa6b175316d85838e4810a
       </SelectionState>
     </selectionStates>
   </component>

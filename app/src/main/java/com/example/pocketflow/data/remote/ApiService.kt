@@ -18,11 +18,19 @@ interface ApiService {
     @POST("/api/login/auth")
     suspend fun loginUser(@Body request: LoginRequest): Response<LoginResponse>
 
+    //Ingresos
     @POST("/api/ingresos")
     suspend fun registrarIngreso(@Body ingreso: IngresoRequest): Response<Void>
 
+    @GET("/api/ingresos/{uid}")
+    suspend fun getIngresos(@Path("uid") uid: String): List<IngresoRequest>
+
+    //Egresos
     @POST("/api/egresos")
     suspend fun registrarEgreso(@Body egreso: EgresoRequest): Response<Void>
+
+    @GET("/api/egresos/{uid}")
+    suspend fun getEgresos(@Path("uid") uid: String): List<EgresoRequest>
 
     @GET("/api/categorias/categorias/{uid}")
     suspend fun getCategorias(@Path("uid") uid: String): CategoriasWrapper
