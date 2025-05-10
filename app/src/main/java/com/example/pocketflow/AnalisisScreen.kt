@@ -2,7 +2,6 @@ package com.example.pocketflow
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,9 +24,14 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
-//import org.jetbrains.compose.charts.pie.PieChart
-//import org.jetbrains.compose.charts.pie.PieChartData
-//import org.jetbrains.compose.charts.pie.PieChartStyle
+import android.view.ViewGroup
+import androidx.compose.ui.viewinterop.AndroidView
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.utils.ColorTemplate
+import androidx.compose.ui.graphics.toArgb
 
 @Composable
 fun AnalisisScreen(
@@ -83,7 +86,7 @@ fun AnalisisScreen(
                     .padding(top = 32.dp, start = 16.dp, bottom = 8.dp),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = AzulOscuro
+                color = AzulClaro
             )
 
             PeriodSelector(periodo) { periodo = it }
@@ -104,7 +107,7 @@ fun AnalisisScreen(
                     fontSize = 18.sp,
                     color = Color.White
                 )
-                //PieChartView(ingresosPorCategoria)
+                PieChartView(ingresosPorCategoria)
 
                 AnalisisCard("Ingresos", ingresosPorCategoria)
             } else {
@@ -125,7 +128,7 @@ fun AnalisisScreen(
                     fontSize = 18.sp,
                     color = Color.White
                 )
-                //PieChartView(egresosPorCategoria)
+                PieChartView(egresosPorCategoria)
 
                 AnalisisCard("Egresos", egresosPorCategoria)
             } else {
@@ -139,34 +142,70 @@ fun AnalisisScreen(
     }
 }
 
-/*@Composable
+@Composable
 fun PieChartView(data: Map<String, Float>) {
-    val colors = listOf(
-        MaterialTheme.colorScheme.primary,
-        MaterialTheme.colorScheme.secondary,
-        MaterialTheme.colorScheme.tertiary,
-        MaterialTheme.colorScheme.error,
-        MaterialTheme.colorScheme.outline
+    val chartColors = listOf(
+        AzulClaro.toArgb(),
+        AmarilloMostaza.toArgb(),
+        AzulOscuro.toArgb(),
+        Color.Red.toArgb(),
+        Color.Green.toArgb(),
+        Color.Magenta.toArgb()
     )
 
-    val entries = data.entries.toList()
-    val chartData = PieChartData(
-        slices = entries.mapIndexed { index, entry ->
-            PieChartData.Slice(
-                value = entry.value.toDouble(),
-                label = entry.key,
-                color = colors[index % colors.size]
-            )
-        }
-    )
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = AzulClaro) // 🔵 Cambiado a AzulClaro
+    ) {
+        AndroidView(
+            factory = { context ->
+                PieChart(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        500
+                    )
+                    description.isEnabled = false
+                    isDrawHoleEnabled = true
+                    setHoleColor(android.graphics.Color.TRANSPARENT)
+                    setUsePercentValues(false)
+                    setEntryLabelColor(android.graphics.Color.TRANSPARENT) // ❌ Oculta etiquetas internas
+                    setEntryLabelTextSize(0f)
 
-    Box(modifier = Modifier.fillMaxWidth().height(250.dp).padding(16.dp)) {
-        PieChart(data = chartData, style = PieChartStyle())
+                    legend.apply {
+                        isEnabled = true
+                        textSize = 14f
+                        formSize = 14f
+                        xEntrySpace = 10f
+                        yEntrySpace = 5f
+                    }
+                }
+            },
+            update = { chart ->
+                val entries = data.map { PieEntry(it.value, it.key) } // ✅ Usa key en leyenda, pero no en gráfico
+                val dataSet = PieDataSet(entries, "").apply {
+                    colors = chartColors.shuffled()
+                    valueTextSize = 16f
+                    valueTextColor = android.graphics.Color.BLACK
+                    sliceSpace = 2f
+                }
+
+                chart.data = PieData(dataSet).apply {
+                    setDrawValues(true)
+                }
+
+                chart.invalidate()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .height(300.dp)
+        )
     }
-}*/
+}
 
-
-// Funciones de filtro y agrupación (igual que antes)
 
 fun filtrarPorPeriodoIngreso(lista: List<IngresoRequest>, periodo: String): List<IngresoRequest> {
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -265,6 +304,7 @@ fun PeriodSelector(selected: String, onPeriodChange: (String) -> Unit) {
         }
     }
 }
+
 
 
 

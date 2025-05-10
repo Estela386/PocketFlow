@@ -81,7 +81,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
-    implementation("io.github.jiung_choi:charts4compose:0.2.2")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     //Para conectar con API
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
