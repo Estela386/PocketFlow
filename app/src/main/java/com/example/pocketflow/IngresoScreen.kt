@@ -22,6 +22,7 @@ import com.example.pocketflow.data.local.UserPreferences
 import com.example.pocketflow.data.remote.models.IngresoRequest
 import com.example.pocketflow.data.remote.RetrofitClient
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
 import kotlinx.coroutines.launch
@@ -240,7 +241,7 @@ fun DatePickerFieldIn(label: String, date: String, onDateSelected: (String) -> U
     ) {
         Text(
             text = label,
-            color = Color(0xFF1C2D44),
+            color = AzulClaro,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)

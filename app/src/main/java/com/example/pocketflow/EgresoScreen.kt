@@ -21,7 +21,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.data.local.UserPreferences
 import com.example.pocketflow.data.remote.models.EgresoRequest
 import com.example.pocketflow.data.remote.RetrofitClient
+import com.example.pocketflow.ui.theme.AmarilloMostaza
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
 import kotlinx.coroutines.launch
@@ -64,10 +66,10 @@ fun EgresoScreen(navController: NavHostController) {
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(36.dp))
 
                 Text(
-                    "Registrar Egreso",
+                    "Registrar Gastos",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1C2D44),
@@ -100,7 +102,7 @@ fun EgresoScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Motivo dropdown
-                Text("Motivo", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
+                Text("Motivo", color = AzulClaro, fontWeight = FontWeight.Bold)
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -181,7 +183,7 @@ fun EgresoScreen(navController: NavHostController) {
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2D44)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB703)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp)
