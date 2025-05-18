@@ -21,6 +21,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.data.local.UserPreferences
 import com.example.pocketflow.data.remote.models.IngresoRequest
 import com.example.pocketflow.data.remote.RetrofitClient
+import com.example.pocketflow.data.remote.models.Categoria
+import com.example.pocketflow.ui.theme.AmarilloMostaza
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
@@ -40,10 +42,24 @@ fun IngresoScreen(navController: NavHostController) {
     var cantidad by remember { mutableStateOf("") }
     var motivoSeleccionado by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-    val motivos = listOf("Pago", "Comida", "Transporte", "Entretenimiento", "Ahorro", "Otro")
+    var isLoading by remember { mutableStateOf(false) }
+    var categoriasList by remember { mutableStateOf<List<String>>(emptyList()) }
+    var motivos by remember { mutableStateOf(listOf<Categoria>()) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val uid = userPrefs.getUid()
+
+    LaunchedEffect(Unit) {
+        val uid = userPrefs.getUid()
+        try {
+            val response = RetrofitClient.api.getCategoriasIngresos(uid ?: "")
+            motivos = response.categorias.map { Categoria(it.categoria, it.descripcion, "") }
+        } catch (e: Exception) {
+            snackbarHostState.showSnackbar("Error al cargar categorías: ${e.message}")
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -65,7 +81,7 @@ fun IngresoScreen(navController: NavHostController) {
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(36.dp))
 
                 Text(
                     "Registrar Ingreso",
@@ -77,31 +93,40 @@ fun IngresoScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Cantidad
+                // Cantidad con símbolo $
                 Text("Cantidad", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
-                TextField(
-                    value = cantidad,
-                    onValueChange = {
-                        if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
-                    },
-                    placeholder = { Text("$0.00", color = Color.Gray) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFA3CFE3),
-                        unfocusedContainerColor = Color(0xFFA3CFE3),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
-                    ),
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                )
+                        .background(Color(0xFFA3CFE3))
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text("$", fontSize = 18.sp, color = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextField(
+                        value = cantidad,
+                        onValueChange = {
+                            if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
+                        },
+                        placeholder = { Text("0.00", color = Color.Gray) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            cursorColor = Color.Black
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Motivo dropdown
-                Text("Motivo", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
+                Text("Motivo", color = AzulClaro, fontWeight = FontWeight.Bold)
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -129,11 +154,11 @@ fun IngresoScreen(navController: NavHostController) {
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        motivos.forEach { motivo ->
+                        motivos.forEach { categoria ->
                             DropdownMenuItem(
-                                text = { Text(motivo) },
+                                text = { Text(categoria.categoria) },
                                 onClick = {
-                                    motivoSeleccionado = motivo
+                                    motivoSeleccionado = categoria.categoria
                                     expanded = false
                                 }
                             )
@@ -150,8 +175,6 @@ fun IngresoScreen(navController: NavHostController) {
 
                 Button(
                     onClick = {
-                        val uid = userPrefs.getUid()
-
                         if (uid.isNullOrEmpty() || cantidad.isBlank() || motivoSeleccionado.isBlank() || fecha.isBlank()) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Por favor completa todos los campos")
@@ -167,6 +190,7 @@ fun IngresoScreen(navController: NavHostController) {
                         )
 
                         scope.launch {
+                            isLoading = true
                             try {
                                 val response = RetrofitClient.api.registrarIngreso(ingreso)
                                 if (response.isSuccessful) {
@@ -179,15 +203,21 @@ fun IngresoScreen(navController: NavHostController) {
                                 }
                             } catch (e: Exception) {
                                 snackbarHostState.showSnackbar("Error de conexión: ${e.message}")
+                            } finally {
+                                isLoading = false
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2D44)),
+                    colors = ButtonDefaults.buttonColors(containerColor = AmarilloMostaza),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp)
                 ) {
-                    Text("Registrar", color = Color.White, fontSize = 18.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("Registrar", color = Color.White, fontSize = 18.sp)
+                    }
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
