@@ -28,13 +28,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalContext
+import com.example.pocketflow.data.local.UserPreferences
+import com.example.pocketflow.ui.theme.AmarilloMostaza
+import com.example.pocketflow.ui.theme.AzulClaro
+import com.example.pocketflow.ui.theme.AzulOscuro
+import com.example.pocketflow.ui.theme.Blanco
 
 @Composable
 fun InicioScreen(navController: NavHostController) {
+
+    val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
+    val nombre = userPreferences.getNombre() ?: "Usuario"  // Aquí recuperas el nombre
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF697EB9))
+            .background(AzulOscuro)
     ) {
         Column(
             modifier = Modifier
@@ -42,7 +53,7 @@ fun InicioScreen(navController: NavHostController) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            HeaderSection(navController)
+            HeaderSection(navController, nombre)
             IncomeExpenseSection(navController)
             OptionsGrid(navController)
             FooterSection()
@@ -51,7 +62,8 @@ fun InicioScreen(navController: NavHostController) {
 }
 
 @Composable
-fun HeaderSection(navController: NavHostController) {
+fun HeaderSection(navController: NavHostController, nombre: String) {
+    val primerNombre = nombre.split(" ").firstOrNull() ?: nombre
     Surface(
         shadowElevation = 8.dp,
         shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp),
@@ -61,12 +73,8 @@ fun HeaderSection(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFBCE6F0), Color(0xFFE4F7FA))
-                    )
-                )
-                .padding(16.dp),
+                .background(AzulClaro)
+                .padding(25.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
@@ -77,33 +85,48 @@ fun HeaderSection(navController: NavHostController) {
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = "Idea",
-                        tint = Color(0xFFFFC107),
+                        tint = AmarilloMostaza,
                         modifier = Modifier.size(60.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Hola, Ana",
-                    fontSize = 28.sp,
+                    text = "Hola, $primerNombre",
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1C2633),
+                    color = AzulOscuro,
                     modifier = Modifier.weight(1f)
                 )
-                Image(
-                    painter = painterResource(id = R.drawable.perfil),
-                    contentDescription = "Foto de perfil",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.White, CircleShape)
-                        .clickable {
-                            navController.navigate("perfil")
-                        }
-                )
-
+                //Inicial en vez de una imagen:
+                Box(modifier = Modifier.clickable { navController.navigate("perfil") }) {
+                    ProfileImageWithInitial(nombre, navController)
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ProfileImageWithInitial(nombre: String, navController: NavHostController) {
+    val primerNombre = nombre.split(" ").firstOrNull() ?: nombre
+    val inicial = primerNombre.firstOrNull()?.uppercase() ?: ""
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(80.dp)
+            .clip(CircleShape)
+            .background(AzulOscuro)
+            .clickable {
+                navController.navigate("perfil")
+            }
+    ) {
+        Text(
+            text = inicial,
+            fontSize = 50.sp,
+            fontWeight = FontWeight.Bold,
+            color = AmarilloMostaza
+        )
     }
 }
 
@@ -142,7 +165,7 @@ fun IncomeExpenseButton(text: String, icon: Int, onClick: () -> Unit) {
                 scaleY = scale
             }
             .shadow(8.dp, RoundedCornerShape(16.dp))
-            .background(Color(0xFFFFE082), RoundedCornerShape(16.dp))
+            .background(Color(0xCEFFB703), RoundedCornerShape(16.dp))
             .clickable(interactionSource = interactionSource, indication = null) {
                 onClick()
             }
@@ -250,7 +273,7 @@ fun FooterSection() {
             .height(80.dp)
             .background(
                 Brush.horizontalGradient(
-                    colors = listOf(Color(0xFFBCE6F0), Color(0xFFE4F7FA))
+                    colors = listOf(AzulClaro, AzulClaro)
                 ),
                 shape = RoundedCornerShape(60.dp)
             ),
@@ -258,7 +281,7 @@ fun FooterSection() {
     ) {
         Text(
             text = "PocketFlow®",
-            color = Color(0xFF1C2633),
+            color = AzulOscuro,
             fontWeight = FontWeight.Bold,
             fontSize = 25.sp
         )

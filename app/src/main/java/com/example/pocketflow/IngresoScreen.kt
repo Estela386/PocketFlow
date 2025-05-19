@@ -2,6 +2,7 @@ package com.example.pocketflow
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,44 +18,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pocketflow.data.local.UserPreferences
+import com.example.pocketflow.data.remote.models.IngresoRequest
+import com.example.pocketflow.data.remote.RetrofitClient
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
+import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IngresoScreen(navController: NavHostController) {
     val context = LocalContext.current
+    val userPrefs = remember { UserPreferences(context) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var fecha by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var motivoSeleccionado by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-    val motivos = listOf("Pago", "Comida", "Transporte", "Entretenimiento", "Otro")
-
-    val calendar = Calendar.getInstance()
-    val showDatePicker = remember { mutableStateOf(false) }
+    val motivos = listOf("Pago", "Comida", "Transporte", "Entretenimiento", "Ahorro", "Otro")
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    if (showDatePicker.value) {
-        DatePickerDialog(
-            context,
-            { _: DatePicker, year: Int, month: Int, day: Int ->
-                fecha = String.format("%02d/%02d/%d", day, month + 1, year)
-                showDatePicker.value = false
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).apply {
-            datePicker.maxDate = System.currentTimeMillis()
-            show()
-        }
-    }
-
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BottomNavigationBar(navController = navController, currentRoute = currentRoute)
         },
@@ -73,7 +65,6 @@ fun IngresoScreen(navController: NavHostController) {
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
@@ -82,28 +73,6 @@ fun IngresoScreen(navController: NavHostController) {
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1C2D44),
                     modifier = Modifier.align(Alignment.Start)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Fecha
-                Text("Fecha", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
-                TextField(
-                    value = fecha,
-                    onValueChange = {},
-                    readOnly = true,
-                    placeholder = { Text("dd/mm/aaaa", color = Color.Gray) },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFA3CFE3),
-                        unfocusedContainerColor = Color(0xFFA3CFE3),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clickable { showDatePicker.value = true }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -172,11 +141,46 @@ fun IngresoScreen(navController: NavHostController) {
                     }
                 }
 
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Fecha personalizada
+                DatePickerFieldIn("Fecha", fecha) { fecha = it }
+
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
                     onClick = {
-                        // Aquí agregarás la lógica para guardar o enviar la información.
+                        val uid = userPrefs.getUid()
+
+                        if (uid.isNullOrEmpty() || cantidad.isBlank() || motivoSeleccionado.isBlank() || fecha.isBlank()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Por favor completa todos los campos")
+                            }
+                            return@Button
+                        }
+
+                        val ingreso = IngresoRequest(
+                            id_usuario = uid,
+                            cantidad = cantidad.toFloat(),
+                            motivo = motivoSeleccionado,
+                            fecha = fecha
+                        )
+
+                        scope.launch {
+                            try {
+                                val response = RetrofitClient.api.registrarIngreso(ingreso)
+                                if (response.isSuccessful) {
+                                    snackbarHostState.showSnackbar("Ingreso registrado correctamente")
+                                    cantidad = ""
+                                    motivoSeleccionado = ""
+                                    fecha = ""
+                                } else {
+                                    snackbarHostState.showSnackbar("Error al registrar ingreso: ${response.code()}")
+                                }
+                            } catch (e: Exception) {
+                                snackbarHostState.showSnackbar("Error de conexión: ${e.message}")
+                            }
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2D44)),
                     modifier = Modifier
@@ -188,6 +192,75 @@ fun IngresoScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.weight(1f))
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerFieldIn(label: String, date: String, onDateSelected: (String) -> Unit) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        DatePickerDialog(
+            context,
+            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+                val dayFormatted = selectedDay.toString().padStart(2, '0')
+                val monthFormatted = (selectedMonth + 1).toString().padStart(2, '0')
+                val isoDate = "$selectedYear-$monthFormatted-$dayFormatted"
+                onDateSelected(isoDate)
+                showDialog = false
+            },
+            year,
+            month,
+            day
+        ).apply {
+            datePicker.maxDate = System.currentTimeMillis()
+            show()
+        }
+    }
+
+    val displayDate = if (date.isNotEmpty()) {
+        val parts = date.split("-")
+        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else "02/03/2000"
+    } else {
+        "02/03/2000"
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    ) {
+        Text(
+            text = label,
+            color = AzulClaro,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color(0xFFA3CFE3))
+                .clickable { showDialog = true }
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = displayDate,
+                color = if (date.isNotEmpty()) Color.Black else Color.Gray,
+                fontSize = 16.sp
+            )
         }
     }
 }
