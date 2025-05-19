@@ -99,7 +99,7 @@ fun CategoriasScreen(navController: NavHostController) {
                     text = "Mis Categorías",
                     fontSize = 35.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulOscuro,
+                    color = AzulClaro,
                     modifier = Modifier
                         .align(Alignment.Start)
                         .padding(start = 8.dp, top = 8.dp, bottom = 16.dp)

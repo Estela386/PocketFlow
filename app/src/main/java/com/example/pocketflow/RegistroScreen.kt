@@ -40,6 +40,11 @@ fun RegistroScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
+
+    var nameError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
+
     var isLoading by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -61,17 +66,55 @@ fun RegistroScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.weight(0.5f))
 
-            InputField("NOMBRE", name, { name = it }, hint = "Ej: Ana Marmolejo")
-            InputField("CORREO", email, { email = it }, hint = "anamarmolejo@hotmail.com")
-            InputField("CONTRASEÑA", password, { password = it }, isPassword = true, hint = "******")
+            InputField(
+                label = "NOMBRE",
+                value = name,
+                onValueChange = {
+                    name = it
+                    nameError = it.isNotEmpty() && !Regex("^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+$").matches(it)
+                },
+                hint = "Ej: Ana Marmolejo",
+                isError = nameError,
+                errorMessage = "El nombre no debe tener números ni símbolos"
+            )
+
+            InputField(
+                label = "CORREO",
+                value = email,
+                onValueChange = {
+                    email = it
+                    emailError = it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+                },
+                hint = "anamarmolejo@hotmail.com",
+                isError = emailError,
+                errorMessage = "Correo inválido"
+            )
+
+            InputField(
+                label = "CONTRASEÑA",
+                value = password,
+                onValueChange = {
+                    password = it
+                    passwordError = it.isNotEmpty() && it.length < 6
+                },
+                isPassword = true,
+                hint = "******",
+                isError = passwordError,
+                errorMessage = "Mínimo 6 caracteres"
+            )
+
             DatePickerField("FECHA DE NACIMIENTO", birthDate) { birthDate = it }
 
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = {
-                    if (name.isBlank() || email.isBlank() || password.isBlank() || birthDate.isBlank()) {
-                        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                    nameError = name.isBlank() || !Regex("^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+$").matches(name)
+                    emailError = email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+                    passwordError = password.isBlank() || password.length < 6
+
+                    if (nameError || emailError || passwordError || birthDate.isBlank()) {
+                        Toast.makeText(context, "Revisa los campos marcados", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
 
@@ -127,7 +170,9 @@ fun InputField(
     value: String,
     onValueChange: (String) -> Unit,
     isPassword: Boolean = false,
-    hint: String = ""
+    hint: String = "",
+    isError: Boolean = false,
+    errorMessage: String = ""
 ) {
     Column(
         modifier = Modifier
@@ -145,7 +190,6 @@ fun InputField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-//            label = { Text(label) },
             placeholder = { Text(hint, color = Color.Gray) },
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -153,11 +197,12 @@ fun InputField(
             ),
             singleLine = true,
             shape = RoundedCornerShape(40.dp),
+            isError = isError,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
-                focusedBorderColor = AmarilloMostaza,
-                unfocusedBorderColor = Color.White,
+                focusedBorderColor = if (isError) Color.Red else AmarilloMostaza,
+                unfocusedBorderColor = if (isError) Color.Red else Color.White,
                 focusedLabelColor = AmarilloMostaza,
                 unfocusedLabelColor = Color.White,
                 cursorColor = AmarilloMostaza,
@@ -166,6 +211,15 @@ fun InputField(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (isError && errorMessage.isNotBlank()) {
+            Text(
+                text = errorMessage,
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 8.dp, top = 2.dp)
+            )
+        }
     }
 }
 
@@ -242,6 +296,7 @@ fun DatePickerField(
         }
     }
 }
+
 
 
 

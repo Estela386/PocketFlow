@@ -29,6 +29,14 @@ interface ApiService {
     @POST("/api/egresos")
     suspend fun registrarEgreso(@Body egreso: EgresoRequest): Response<Void>
 
+    //Categorias de Gastos
+    @GET("/api/categorias/{uid}/filtrar/Gastos")
+    suspend fun getCategoriasGastos(@Path("uid") uid: String): CategoriasWrapper
+
+    //Categorias de Ingresos
+    @GET("/api/categorias/{uid}/filtrar/Ingresos")
+    suspend fun getCategoriasIngresos(@Path("uid") uid: String): CategoriasWrapper
+
     @GET("/api/egresos/{uid}")
     suspend fun getEgresos(@Path("uid") uid: String): List<EgresoRequest>
 
