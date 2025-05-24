@@ -1,8 +1,12 @@
 package com.example.pocketflow
 
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,27 +17,75 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.CallingCode
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.BottomNavigationBar
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import com.example.pocketflow.ui.theme.TopBar
-
 
 @Composable
 fun RecompensasScreen(navController: NavHostController) {
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val context = LocalContext.current
+    var goals by remember { mutableStateOf(mutableListOf<String>()) }
+    var progress by remember { mutableStateOf(0f) }
+    var showCongrats by remember { mutableStateOf(false) }
+
+    // Dialog para agregar meta
+    var showAddGoalDialog by remember { mutableStateOf(false) }
+    var newGoalText by remember { mutableStateOf("") }
+
+    // Efecto para mostrar felicitación y reiniciar
+    if (showCongrats) {
+        LaunchedEffect(Unit) {
+            Toast.makeText(context, "¡Felicidades por lograr tus metas!", Toast.LENGTH_LONG).show()
+            kotlinx.coroutines.delay(2000)
+            goals = mutableListOf()
+            progress = 0f
+            showCongrats = false
+        }
+    }
+
+    if (showAddGoalDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddGoalDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newGoalText.isNotBlank()) {
+                            goals = (goals + newGoalText).toMutableList()
+                            newGoalText = ""
+                            showAddGoalDialog = false
+                        }
+                    }
+                ) { Text("Agregar") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showAddGoalDialog = false }
+                ) { Text("Cancelar") }
+            },
+            title = { Text("Agregar nuevo objetivo") },
+            text = {
+                OutlinedTextField(
+                    value = newGoalText,
+                    onValueChange = { newGoalText = it },
+                    label = { Text("Nuevo objetivo") }
+                )
+            }
+        )
+    }
 
     Scaffold(
         bottomBar = {
@@ -45,60 +97,108 @@ fun RecompensasScreen(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues) // importante para no tapar el contenido con el BottomNavigationBar
+                .padding(paddingValues)
         ) {
             AnimatedWaveBackground()
-            TopBar(navController)
-
-            BoxWithConstraints(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp)
+                    .padding(start = 24.dp, end = 24.dp, top = 10.dp)
             ) {
-                val screenWidth = maxWidth
-                val circleSize = screenWidth * 0.6f
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Tus Metas",
+                    fontSize = 28.sp,
+                    fontFamily = CallingCode,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF222222),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically)
+                // Circle with progress and trophy
+                LiquidProgressCircle(
+                    progress = progress,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(220.dp)
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+                Text(
+                    text = "Últimos logros completados",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF555555),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // Fila de botones - y +
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    IconButton(
+                        onClick = {
+                            if (goals.isNotEmpty()) goals = goals.dropLast(1).toMutableList()
+                        },
+                        enabled = goals.isNotEmpty()
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.menos),
+                            contentDescription = "Eliminar objetivo",
+                            modifier = Modifier.size(34.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = { showAddGoalDialog = true }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.mas),
+                            contentDescription = "Agregar objetivo",
+                            modifier = Modifier.size(34.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Lista de metas
+                if (goals.isEmpty()) {
                     Text(
-                        text = "Tus Metas",
-                        fontSize = 28.sp,
-                        fontFamily = CallingCode,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF222222)
+                        text = "Agrega tu primer objetivo con el botón +",
+                        color = Color(0xFF888888),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
-
-                    LiquidProgressCircle(
-                        progress = 0.4f,
-                        modifier = Modifier.size(circleSize)
-                    )
-
-                    Text(
-                        text = "Últimos logros completados",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF555555)
-                    )
-
+                } else {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp),
+                            .padding(top = 0.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        GoalItem("No gastos innecesarios el fin de semana", true)
-                        GoalItem("No comprar en línea por 15 días", true)
-                        GoalItem("Usar transporte público en lugar de Uber", true)
+                        goals.forEachIndexed { idx, goal ->
+                            GoalItem(
+                                text = goal,
+                                isCompleted = false,
+                                onStarClick = {
+                                    // Al presionar la estrella, aumentar el progreso
+                                    if (progress < 1f) {
+                                        val step = if (goals.isNotEmpty()) 1f / goals.size else 1f
+                                        progress = (progress + step).coerceAtMost(1f)
+                                        if (progress >= 1f) showCongrats = true
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun LiquidProgressCircle(progress: Float, modifier: Modifier = Modifier) {
@@ -190,7 +290,11 @@ fun LiquidProgressCircle(progress: Float, modifier: Modifier = Modifier) {
 fun shiftOffset(shift: Float, waveLength: Float): Float = shift * waveLength
 
 @Composable
-fun GoalItem(text: String, isCompleted: Boolean) {
+fun GoalItem(
+    text: String,
+    isCompleted: Boolean,
+    onStarClick: () -> Unit = {}
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -207,14 +311,14 @@ fun GoalItem(text: String, isCompleted: Boolean) {
                 fontSize = 14.sp,
                 color = Color(0xFF222222)
             )
-            if (isCompleted) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Completado",
-                    tint = Color(0xFFFFD700),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = "Completado",
+                tint = Color(0xFFFFD700),
+                modifier = Modifier
+                    .size(22.dp)
+                    .clickable { onStarClick() }
+            )
         }
     }
 }
