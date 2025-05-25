@@ -15,3 +15,10 @@ val AzulClaro = Color(0xFF8AB4CC)
 val AmarilloMostaza = Color(0xFFFFB703)
 val Blanco = Color(0xFFFFFFFF)
 
+val Pastel1 = Color(0xFF1B263A) // AzulOscuro
+val Pastel2 = Color(0xFF005F73) // Verde petróleo
+val Pastel3 = Color(0xFF6A4C93) // Púrpura
+val Pastel4 = Color(0xFF588157) // Verde seco
+val Pastel5 = Color(0xFF7A3E48) // Rojo quemado oscuro
+val Pastel6 = Color(0xFF37474F) // Azul grisáceo oscuro
+val Pastel7 = Color(0xFF4A5759) // Gris verdoso oscuro
