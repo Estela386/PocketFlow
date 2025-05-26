@@ -77,4 +77,11 @@ interface ApiService {
         @Query("periodo") periodo: String // "semana", "mes", "anio"
     ): List<Prediccion>
 
+    // En ApiService.kt
+    @POST("api/login/verificar-correo")
+    suspend fun verificarCorreo(@Body request: VerificarCorreoRequest): Response<Map<String, Boolean>>
+
+    @POST("api/login/cambiar-contrasena")
+    suspend fun cambiarContrasena(@Body request: CambiarContrasenaRequest): Response<Unit>
+
 }
