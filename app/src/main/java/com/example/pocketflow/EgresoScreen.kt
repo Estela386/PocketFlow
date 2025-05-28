@@ -6,6 +6,7 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -45,9 +46,6 @@ fun EgresoScreen(navController: NavHostController) {
     var expanded by remember { mutableStateOf(false) }
     var motivos by remember { mutableStateOf(listOf<Categoria>()) }
 
-    var isLoading by remember { mutableStateOf(false) }
-    var resultSuccess by remember { mutableStateOf<Boolean?>(null) }
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -57,7 +55,9 @@ fun EgresoScreen(navController: NavHostController) {
             val response = RetrofitClient.api.getCategoriasGastos(uid ?: "")
             motivos = response.categorias.map { Categoria(it.categoria, it.descripcion, "") }
         } catch (e: Exception) {
-            snackbarHostState.showSnackbar("Error al cargar categorías: ${e.message}")
+            scope.launch {
+                snackbarHostState.showSnackbar("Error al cargar categorías: ${e.message}")
+            }
         }
     }
 
@@ -78,55 +78,44 @@ fun EgresoScreen(navController: NavHostController) {
 
             Column(
                 modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(36.dp))
-
                 Text(
-                    "Registrar Gastos",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1C2D44),
-                    modifier = Modifier.align(Alignment.Start)
+                    text = "Registrar Gasto",
+                    fontSize = 35.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = AzulClaro,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                TextField(
+                    value = cantidad,
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
+                    },
+                    placeholder = { Text("Cantidad", color = Color.Gray) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        cursorColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Cantidad
-                Text("Cantidad", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .background(Color(0xFFA3CFE3))
-                        .padding(start = 12.dp)
-                ) {
-                    Text("$", color = Color.DarkGray, fontSize = 18.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextField(
-                        value = cantidad,
-                        onValueChange = {
-                            if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black,
-                            cursorColor = Color.Black
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Motivo
-                Text("Motivo", color = AzulClaro, fontWeight = FontWeight.Bold)
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -135,21 +124,24 @@ fun EgresoScreen(navController: NavHostController) {
                         value = motivoSeleccionado,
                         onValueChange = {},
                         readOnly = true,
-                        placeholder = { Text("Seleccionar", color = Color.Gray) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        placeholder = { Text("Motivo", color = Color.Gray) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        singleLine = true,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFA3CFE3),
-                            unfocusedContainerColor = Color(0xFFA3CFE3),
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
                             focusedTextColor = Color.Black,
                             unfocusedTextColor = Color.Black,
                             cursorColor = Color.Black
                         ),
+                        shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .menuAnchor()
                             .fillMaxWidth()
-                            .height(50.dp)
+                            .height(55.dp)
                     )
-
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
@@ -166,26 +158,21 @@ fun EgresoScreen(navController: NavHostController) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Fecha
-                DatePickerFieldIn("Fecha", fecha) { fecha = it }
+                DatePickerFieldIngreso("Fecha", fecha) { fecha = it }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
                     onClick = {
                         val uid = userPrefs.getUid()
-
                         if (uid.isNullOrEmpty() || cantidad.isBlank() || motivoSeleccionado.isBlank() || fecha.isBlank()) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Por favor completa todos los campos")
                             }
                             return@Button
                         }
-
-                        isLoading = true
-                        resultSuccess = null
 
                         val egreso = EgresoRequest(
                             id_usuario = uid,
@@ -198,62 +185,29 @@ fun EgresoScreen(navController: NavHostController) {
                             try {
                                 val response = RetrofitClient.api.registrarEgreso(egreso)
                                 if (response.isSuccessful) {
-                                    resultSuccess = true
+                                    snackbarHostState.showSnackbar("Gasto registrado correctamente")
                                     cantidad = ""
                                     motivoSeleccionado = ""
                                     fecha = ""
                                 } else {
-                                    resultSuccess = false
+                                    snackbarHostState.showSnackbar("Error al registrar gasto")
                                 }
                             } catch (e: Exception) {
-                                resultSuccess = false
-                            } finally {
-                                delay(1500)
-                                isLoading = false
+                                snackbarHostState.showSnackbar("Error de conexión: ${e.message}")
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = AmarilloMostaza),
+                    colors = ButtonDefaults.buttonColors(containerColor = AzulClaro),
+                    shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp)
                 ) {
-                    Text("Registrar", color = Color.White, fontSize = 18.sp)
+                    Text("Registrar", color = AzulOscuro, fontSize = 18.sp)
                 }
-
-                AnimatedVisibility(
-                    visible = isLoading,
-                    enter = fadeIn() + scaleIn(),
-                    exit = fadeOut() + scaleOut(),
-                    modifier = Modifier.padding(top = 20.dp)
-                ) {
-                    CircularProgressIndicator(color = AzulClaro)
-                }
-
-                AnimatedVisibility(
-                    visible = resultSuccess != null && !isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.padding(top = 20.dp)
-                ) {
-                    if (resultSuccess == true) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.Green)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Gasto registrado correctamente", color = Color.Green)
-                        }
-                    } else {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Error, contentDescription = null, tint = Color.Red)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Registro erróneo", color = Color.Red)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
 }
+
 

@@ -8,8 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.pocketflow.data.remote.ApiService
 import com.example.pocketflow.data.remote.models.ActualizarCorreoRequest
 import com.example.pocketflow.data.remote.models.ActualizarContrasenaRequest
-import com.google.firebase.crashlytics.buildtools.reloc.org.apache.http.client.HttpClient
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,7 +22,7 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
     val correo: StateFlow<String> = _correo
 
     private val apiService: ApiService = Retrofit.Builder()
-//        .baseUrl("http://10.0.2.2:8000") // Reemplaza por tu IP o URL real si es necesario
+       // .baseUrl("http://10.0.2.2:8000") // Reemplaza por tu IP o URL real si es necesario
         .baseUrl("http://127.0.0.1:8000/") // Cambia por tu IP local si hace falta
         .addConverterFactory(GsonConverterFactory.create())
         .build()
