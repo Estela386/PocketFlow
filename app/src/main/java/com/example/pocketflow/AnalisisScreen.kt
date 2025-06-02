@@ -78,15 +78,20 @@ fun AnalisisScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            TopBar(navController)
+            TopBar(
+                navController = navController,
+                modifier = Modifier.padding(top = 16.dp) // Puedes ajustar este valor
+            )
+
 
             Text(
                 text = "Análisis",
-                modifier = Modifier
-                    .padding(top = 32.dp, start = 16.dp, bottom = 8.dp),
-                fontSize = 28.sp,
+                fontSize = 35.sp,
                 fontWeight = FontWeight.Bold,
-                color = AzulClaro
+                color = AzulClaro,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 5.dp, bottom = 16.dp)
             )
 
             PeriodSelector(periodo) { periodo = it }

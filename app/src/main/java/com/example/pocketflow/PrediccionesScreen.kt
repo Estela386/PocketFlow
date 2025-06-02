@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
 
@@ -41,17 +42,20 @@ fun PrediccionesScreen(navController: NavHostController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 64.dp),
+                    .padding(55.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Predicciones de siguientes gastos",
-                    fontSize = 20.sp,
+                    text = "Predicciones",
+                    fontSize = 35.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = AzulClaro,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 8.dp, bottom = 16.dp)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
                     text = "Medido sólo en gastos, no inversiones",

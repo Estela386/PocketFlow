@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
+import com.example.pocketflow.ui.theme.AzulClaro
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
 
@@ -60,14 +61,18 @@ fun HuellaScreen(navController: NavHostController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
+                    .padding(55.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // Título principal
-                Text("Tu impacto Ambiental", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-
+                Text(
+                    text = "Impacto Ambiental",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AzulClaro,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
                 Box(contentAlignment = Alignment.Center) {
                     CircularImpactChart(proportions = if (selectedPeriod == "Mes") monthlyData else weeklyData)
                     Box(

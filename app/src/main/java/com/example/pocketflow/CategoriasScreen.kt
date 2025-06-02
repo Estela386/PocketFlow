@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -85,28 +86,20 @@ fun CategoriasScreen(navController: NavHostController) {
                     .padding(55.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                }
 
                 Text(
-                    text = "Mis Categorías",
+                    text = "Categorías",
                     fontSize = 35.sp,
                     fontWeight = FontWeight.Bold,
                     color = AzulClaro,
                     modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(start = 8.dp, top = 8.dp, bottom = 16.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 8.dp, bottom = 16.dp)
                 )
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp), // cambia a los pixeles que desees
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
@@ -116,15 +109,23 @@ fun CategoriasScreen(navController: NavHostController) {
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = AzulClaro),
-                        shape = MaterialTheme.shapes.medium,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = 8.dp)
+                            .padding(end = 4.dp)
                     ) {
-                        Icon(Icons.Default.Clear, contentDescription = "Eliminar")
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Eliminar",
+                            modifier = Modifier.size(20.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Eliminar")
+                        Text(
+                            text = "Eliminar",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
+
 
                     Button(
                         onClick = {
@@ -134,15 +135,23 @@ fun CategoriasScreen(navController: NavHostController) {
                             showAddDialog = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = AzulClaro),
-                        shape = MaterialTheme.shapes.medium,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 8.dp)
+                            .padding(end = 4.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Agregar")
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Agregar",
+                            modifier = Modifier.size(20.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Agregar")
+                        Text(
+                            text = "Agregar",
+                            style = MaterialTheme.typography.labelLarge // usa estilo adaptativo
+                        )
                     }
+
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

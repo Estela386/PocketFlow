@@ -12,13 +12,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -83,7 +89,7 @@ fun HeaderSection(navController: NavHostController, nombre: String) {
             ) {
                 IconButton(onClick = { navController.navigate("recompensas") }) {
                     Icon(
-                        imageVector = Icons.Default.Star,
+                        imageVector = Icons.Default.EmojiEvents  ,
                         contentDescription = "Idea",
                         tint = AmarilloMostaza,
                         modifier = Modifier.size(60.dp)
@@ -181,7 +187,7 @@ fun IncomeExpenseButton(text: String, icon: Int, onClick: () -> Unit) {
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = text,
-            color = Color(0xFF1C2633),
+            color = Blanco,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
         )

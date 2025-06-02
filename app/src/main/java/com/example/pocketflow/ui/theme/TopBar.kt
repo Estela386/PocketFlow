@@ -20,11 +20,11 @@ import androidx.navigation.NavController
 
 
 @Composable
-fun TopBar(navController: NavController) {
+fun TopBar(navController: NavController, modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Fila superior
@@ -35,14 +35,14 @@ fun TopBar(navController: NavController) {
         ) {
             // Botón de atrás
             IconButton(onClick = { navController.navigate("inicio") }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Color.Black)
+                Icon(Icons.Default.Home, contentDescription = "Atrás", tint = Color.DarkGray, modifier = Modifier.size(60.dp))
             }
             // Botón de recompensas
             IconButton(onClick = { navController.navigate("recompensas") }) {
                 Icon(
-                    imageVector = Icons.Default.Star,
+                    imageVector = Icons.Default.EmojiEvents ,
                     contentDescription = "Idea",
-                    tint = Color(0xFFFFC107),
+                    //tint = Color(0xFFFFC107),
                     modifier = Modifier.size(60.dp)
                 )
             }

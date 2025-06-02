@@ -66,16 +66,26 @@ fun IngresoScreen(navController: NavHostController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.Center,
+                    .padding(55.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Registrar Ingreso",
+                    text = "Registrar",
                     fontSize = 35.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AzulClaro,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+                Text(
+                    text = "INGRESO",
+                    fontSize = 45.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = AzulClaro,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 20.dp, bottom = 16.dp)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

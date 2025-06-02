@@ -31,6 +31,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
+import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -108,6 +109,7 @@ fun EscanerScreen(navController: NavHostController) {
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
+                AnimatedWaveBackground()
                 // Vista de la cámara
                 AndroidView(
                     factory = { previewView },
