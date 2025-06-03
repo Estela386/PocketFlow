@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PocketFlowApp() {
     val navController = rememberNavController()
+    val scanViewModel = remember { ScanViewModel() }
 
     NavHost(
         navController = navController,
@@ -52,3 +53,4 @@ fun PocketFlowApp() {
         composable("registro"){RegistroScreen(navController)}
     }
 }
+
