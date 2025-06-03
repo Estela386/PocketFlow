@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import com.example.pocketflow.ui.theme.TopBar
 
+
 @Composable
 fun RecompensasScreen(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
