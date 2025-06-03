@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,6 +36,63 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.io.File
 
+// Modelo de datos para una compra individual
+data class Compra(val descripcion: String, val precio: String)
+
+// Modelo de datos para el ticket escaneado
+data class TicketInfo(
+    val total: String,
+    val fecha: String,
+    val compras: List<Compra>
+)
+
+object TicketProcessor {
+    fun extraerInformacion(ticketTexto: String): TicketInfo {
+        val totalRegex = Regex("""(?i)total\s*[:\$]?\s*(\d+(?:\.\d{2})?)""")
+        val fechaRegex = Regex("""\b\d{2}/\d{2}/\d{4}\b""")
+        val lineaCompraRegex = Regex("""(.+?)\s+\$?(\d+(?:\.\d{2})?)""")
+
+        val total = totalRegex.find(ticketTexto)?.groupValues?.get(1) ?: "No detectado"
+        val fecha = fechaRegex.find(ticketTexto)?.value ?: "No detectada"
+
+        // --- Nuevo preprocesamiento de líneas para unir descripción y precio separados ---
+        val lineas = ticketTexto.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        val lineasUnidas = mutableListOf<String>()
+
+        var buffer = ""
+        for (line in lineas) {
+            if (line.matches(Regex("""^\$?\d+(?:\.\d{2})?$"""))) {
+                // La línea actual parece ser solo un precio
+                buffer += " $line"
+                lineasUnidas.add(buffer.trim())
+                buffer = ""
+            } else {
+                // Línea nueva, posiblemente descripción
+                if (buffer.isNotEmpty()) {
+                    lineasUnidas.add(buffer.trim())
+                }
+                buffer = line
+            }
+        }
+        if (buffer.isNotEmpty()) {
+            lineasUnidas.add(buffer.trim())
+        }
+
+        // Extraer compras usando el regex
+        val compras = lineasUnidas.mapNotNull { linea ->
+            val match = lineaCompraRegex.find(linea)
+            if (match != null) {
+                val desc = match.groupValues[1].trim()
+                val precio = match.groupValues[2]
+                Compra(desc, precio)
+            } else null
+        }
+
+        return TicketInfo(total = total, fecha = fecha, compras = compras)
+    }
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EscanerScreen(navController: NavHostController) {
@@ -46,6 +102,7 @@ fun EscanerScreen(navController: NavHostController) {
     val imageCapture = remember { ImageCapture.Builder().build() }
     val previewView = remember { PreviewView(context) }
     var resultadoTexto by remember { mutableStateOf("") }
+    var infoExtraida by remember { mutableStateOf<TicketInfo?>(null) }
 
     val permisoCamaraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -75,6 +132,7 @@ fun EscanerScreen(navController: NavHostController) {
             uri?.let {
                 escanearTextoDesdeImagen(context, it) { texto ->
                     resultadoTexto = texto
+                    infoExtraida = TicketProcessor.extraerInformacion(texto)
                 }
             }
         }
@@ -110,7 +168,7 @@ fun EscanerScreen(navController: NavHostController) {
                     .verticalScroll(rememberScrollState())
             ) {
                 AnimatedWaveBackground()
-                // Vista de la cámara
+
                 AndroidView(
                     factory = { previewView },
                     modifier = Modifier
@@ -119,7 +177,6 @@ fun EscanerScreen(navController: NavHostController) {
                         .padding(bottom = 16.dp)
                 )
 
-                // Botones de acciones
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
@@ -138,6 +195,7 @@ fun EscanerScreen(navController: NavHostController) {
                                     val uri = Uri.fromFile(photoFile)
                                     escanearTextoDesdeImagen(context, uri) { texto ->
                                         resultadoTexto = texto
+                                        infoExtraida = TicketProcessor.extraerInformacion(texto)
                                     }
                                 }
 
@@ -161,28 +219,42 @@ fun EscanerScreen(navController: NavHostController) {
                     }
                 }
 
-                // Resultado del escaneo
-                Text(
-                    text = "Texto Detectado:",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                infoExtraida?.let {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (it.compras.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("→ Compras:", fontWeight = FontWeight.Bold)
 
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7)),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    SelectionContainer {
-                        Text(
-                            text = resultadoTexto.ifEmpty { "No se ha detectado texto aún." },
-                            fontSize = 16.sp,
-                            color = Color.DarkGray,
+                        Card(
                             modifier = Modifier
-                                .padding(16.dp)
                                 .fillMaxWidth()
-                        )
+                                .padding(vertical = 8.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF)),
+                            elevation = CardDefaults.cardElevation(2.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Descripción", fontWeight = FontWeight.Bold)
+                                    Text("Precio", fontWeight = FontWeight.Bold)
+                                }
+                                Divider(modifier = Modifier.padding(vertical = 4.dp))
+
+                                it.compras.forEach { compra ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(compra.descripcion, modifier = Modifier.weight(1f))
+                                        Text("$${compra.precio}", modifier = Modifier.padding(start = 8.dp))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -204,3 +276,4 @@ fun escanearTextoDesdeImagen(context: Context, uri: Uri, onResult: (String) -> U
             onResult("Error al procesar la imagen.")
         }
 }
+
