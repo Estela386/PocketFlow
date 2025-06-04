@@ -163,6 +163,14 @@ fun LoginScreen(navController: NavController) {
             }) {
                 Text("¿No tienes cuenta? Regístrate", color = AmarilloMostaza, fontSize = 15.sp,)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = {
+                navController.navigate("recuperar")
+            }) {
+                Text("¿Olvidaste tu contraseña?", color = AmarilloMostaza, fontSize = 15.sp,)
+            }
         }
     }
 }

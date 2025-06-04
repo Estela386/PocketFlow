@@ -1,19 +1,32 @@
 package com.example.pocketflow
 
-import androidx.compose.foundation.background
+import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.example.pocketflow.data.remote.RetrofitClient
+import com.example.pocketflow.data.remote.models.Prediccion
+import com.example.pocketflow.ui.theme.*
+import com.example.pocketflow.data.local.UserPreferences
+import kotlinx.coroutines.launch
+import androidx.compose.ui.viewinterop.AndroidView
+import java.util.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
@@ -22,10 +35,42 @@ import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
 
 @Composable
-fun PrediccionesScreen(navController: NavHostController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+fun PrediccionesScreen(navController: NavController) {
+    val context = LocalContext.current
+    val userPrefs = remember { UserPreferences(context) }
 
+    var periodoSeleccionado by remember { mutableStateOf("semana") }
+    var datosPorMotivo by remember { mutableStateOf(listOf<Prediccion>()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(periodoSeleccionado) {
+        isLoading = true
+        val uid = userPrefs.getUid()
+        try {
+            val response = RetrofitClient.api.obtenerPredicciones(uid, periodoSeleccionado)
+            datosPorMotivo = response
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error al obtener predicciones", Toast.LENGTH_LONG).show()
+        }
+        isLoading = false
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedWaveBackground()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            TopBar(navController)
+
+            Text(
+                text = "Predicciones",
+                fontSize = 28.sp,
+                color = AzulClaro,
+                modifier = Modifier.padding(start = 16.dp, top = 32.dp, bottom = 8.dp)
+            )
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController = navController, currentRoute = currentRoute)
@@ -63,113 +108,145 @@ fun PrediccionesScreen(navController: NavHostController) {
                     color = Color.White.copy(alpha = 0.8f)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "$5,897",
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Simulación de gráfica
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Gráfica de gastos (simulada)",
-                        color = Color.White.copy(alpha = 0.6f),
-                        fontSize = 14.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Círculo con "Aún por reservar"
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                listOf("semana", "mes", "anio").forEach { label ->
+                    Button(
+                        onClick = { periodoSeleccionado = label },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (periodoSeleccionado == label) AzulClaro else Color.LightGray
+                        ),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                    ) {
                         Text(
-                            text = "$3,099",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = "Aún por reservar",
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            label.replaceFirstChar { it.titlecase(Locale.ROOT) }
                         )
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                // Advertencia
-                Text(
-                    text = "Atención.",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Red
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp)
                 )
+            } else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Comparación por Categoría",
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        BarChartPredicciones(datosPorMotivo)
+                    }
+                }
 
-                Text(
-                    text = "~16% Probabilidad de un gasto mayor que el actual mes",
-                    fontSize = 12.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                // Card con los datos detallados
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Datos Detallados",
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                        Column(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                            datosPorMotivo.forEach { pred ->
+                                Text(
+                                    text = "${pred.motivo}: Real \$${pred.cantidad_real} - Predicho \$${pred.cantidad_predicha}",
+                                    fontSize = 14.sp,
+                                    color = Color.DarkGray,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
 
-                // Últimos movimientos
-                Text(
-                    text = "ÚLTIMOS MOVIMIENTOS",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.9f),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                MovimientoItem("04 de Marzo", "Amazon mx markeltp", "$872")
-                MovimientoItem("04 de Marzo", "Stripe uber trip", "$193")
-                MovimientoItem("03 de Marzo", "Struber eats", "$301")
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
 }
 
 @Composable
-fun MovimientoItem(fecha: String, descripcion: String, monto: String) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(text = fecha, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f))
-                Text(text = descripcion, fontSize = 14.sp, color = Color.White)
+fun BarChartPredicciones(data: List<Prediccion>) {
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(320.dp),
+        factory = { context ->
+            val chart = BarChart(context)
+
+            val realEntries = ArrayList<BarEntry>()
+            val predEntries = ArrayList<BarEntry>()
+            val labels = ArrayList<String>()
+
+            data.forEachIndexed { index, item ->
+                realEntries.add(BarEntry(index.toFloat(), item.cantidad_real))
+                predEntries.add(BarEntry(index.toFloat(), item.cantidad_predicha))
+                labels.add(item.motivo)
             }
-            Text(text = monto, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color.White)
+
+            val dataSetReal = BarDataSet(realEntries, "Gasto real").apply {
+                color = AzulClaro.toArgb()
+            }
+
+            val dataSetPred = BarDataSet(predEntries, "Predicción").apply {
+                color = AmarilloMostaza.toArgb()
+            }
+
+            val barData = BarData(dataSetReal, dataSetPred)
+            val groupSpace = 0.2f
+            val barSpace = 0.05f
+            val barWidth = 0.35f
+
+            barData.barWidth = barWidth
+            chart.data = barData
+            chart.description.isEnabled = false
+            chart.setFitBars(true)
+            chart.axisRight.isEnabled = false
+            chart.legend.isEnabled = true
+
+            chart.xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(labels)
+                granularity = 1f
+                isGranularityEnabled = true
+                setDrawGridLines(false)
+                position = XAxis.XAxisPosition.BOTTOM
+                labelRotationAngle = -30f
+                textColor = Color.Black.toArgb()
+            }
+
+            chart.axisLeft.textColor = Color.Black.toArgb()
+            chart.groupBars(0f, groupSpace, barSpace)
+            chart.invalidate()
+
+            chart
         }
-        Divider(color = Color.White.copy(alpha = 0.3f), thickness = 0.5.dp)
-    }
+    )
 }
+

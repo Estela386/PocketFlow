@@ -150,12 +150,13 @@ fun AnalisisScreen(
 @Composable
 fun PieChartView(data: Map<String, Float>) {
     val chartColors = listOf(
-        AzulClaro.toArgb(),
-        AmarilloMostaza.toArgb(),
-        AzulOscuro.toArgb(),
-        Color.Red.toArgb(),
-        Color.Green.toArgb(),
-        Color.Magenta.toArgb()
+        Pastel1.toArgb(),
+        Pastel2.toArgb(),
+        Pastel3.toArgb(),
+        Pastel4.toArgb(),
+        Pastel5.toArgb(),
+        Pastel6.toArgb(),
+        Pastel7.toArgb(),
     )
 
     Card(
@@ -193,7 +194,7 @@ fun PieChartView(data: Map<String, Float>) {
                 val dataSet = PieDataSet(entries, "").apply {
                     colors = chartColors.shuffled()
                     valueTextSize = 16f
-                    valueTextColor = android.graphics.Color.BLACK
+                    valueTextColor = android.graphics.Color.WHITE
                     sliceSpace = 2f
                 }
 

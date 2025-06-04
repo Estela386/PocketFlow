@@ -50,5 +50,6 @@ fun PocketFlowApp() {
         composable("predicciones"){PrediccionesScreen(navController)}
         composable("recibo"){ReciboScreen(navController)}
         composable("registro"){RegistroScreen(navController)}
+        composable("recuperar"){ RecuperacionScreen(navController) }
     }
 }

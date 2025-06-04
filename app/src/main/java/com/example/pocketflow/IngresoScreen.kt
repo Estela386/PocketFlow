@@ -20,12 +20,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pocketflow.data.local.UserPreferences
+import com.example.pocketflow.data.remote.models.IngresoRequest
 import com.example.pocketflow.data.remote.RetrofitClient
 import com.example.pocketflow.data.remote.models.IngresoRequest
 import com.example.pocketflow.ui.theme.AnimatedWaveBackground
 import com.example.pocketflow.ui.theme.AzulClaro
-import com.example.pocketflow.ui.theme.AzulOscuro
-import com.example.pocketflow.ui.theme.AmarilloMostaza
 import com.example.pocketflow.ui.theme.BottomNavigationBar
 import com.example.pocketflow.ui.theme.TopBar
 import kotlinx.coroutines.launch
@@ -48,6 +47,18 @@ fun IngresoScreen(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val uid = userPrefs.getUid()
+
+    LaunchedEffect(Unit) {
+        val uid = userPrefs.getUid()
+        try {
+            val response = RetrofitClient.api.getCategoriasIngresos(uid ?: "")
+            motivos = response.categorias.map { Categoria(it.categoria, it.descripcion, "") }
+        } catch (e: Exception) {
+            snackbarHostState.showSnackbar("Error al cargar categorías: ${e.message}")
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
@@ -62,13 +73,14 @@ fun IngresoScreen(navController: NavHostController) {
         ) {
             AnimatedWaveBackground()
             TopBar(navController)
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(55.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(36.dp))
+
                 Text(
                     text = "Registrar",
                     fontSize = 35.sp,
@@ -90,6 +102,35 @@ fun IngresoScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Cantidad con símbolo $
+                Text("Cantidad", color = Color(0xFF1C2D44), fontWeight = FontWeight.Bold)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .background(Color(0xFFA3CFE3))
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text("$", fontSize = 18.sp, color = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextField(
+                        value = cantidad,
+                        onValueChange = {
+                            if (it.all { char -> char.isDigit() || char == '.' }) cantidad = it
+                        },
+                        placeholder = { Text("0.00", color = Color.Gray) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            cursorColor = Color.Black
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 TextField(
                     value = cantidad,
                     onValueChange = {
@@ -113,6 +154,8 @@ fun IngresoScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Motivo dropdown
+                Text("Motivo", color = AzulClaro, fontWeight = FontWeight.Bold)
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -143,11 +186,11 @@ fun IngresoScreen(navController: NavHostController) {
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        motivos.forEach { motivo ->
+                        motivos.forEach { categoria ->
                             DropdownMenuItem(
-                                text = { Text(motivo) },
+                                text = { Text(categoria.categoria) },
                                 onClick = {
-                                    motivoSeleccionado = motivo
+                                    motivoSeleccionado = categoria.categoria
                                     expanded = false
                                 }
                             )
@@ -179,6 +222,7 @@ fun IngresoScreen(navController: NavHostController) {
                         )
 
                         scope.launch {
+                            isLoading = true
                             try {
                                 val response = RetrofitClient.api.registrarIngreso(ingreso)
                                 if (response.isSuccessful) {
@@ -191,16 +235,24 @@ fun IngresoScreen(navController: NavHostController) {
                                 }
                             } catch (e: Exception) {
                                 snackbarHostState.showSnackbar("Error de conexión: ${e.message}")
+                            } finally {
+                                isLoading = false
                             }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = AzulClaro),
                     shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AmarilloMostaza),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp)
                 ) {
                     Text("Registrar", color = AzulOscuro, fontSize = 18.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("Registrar", color = Color.White, fontSize = 18.sp)
+                    }
                 }
             }
         }
@@ -211,6 +263,7 @@ fun IngresoScreen(navController: NavHostController) {
 fun DatePickerFieldIngreso(label: String, date: String, onDateSelected: (String) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
+
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
@@ -227,7 +280,9 @@ fun DatePickerFieldIngreso(label: String, date: String, onDateSelected: (String)
                 onDateSelected(isoDate)
                 showDialog = false
             },
-            year, month, day
+            year,
+            month,
+            day
         ).apply {
             datePicker.maxDate = System.currentTimeMillis()
             show()
@@ -236,24 +291,39 @@ fun DatePickerFieldIngreso(label: String, date: String, onDateSelected: (String)
 
     val displayDate = if (date.isNotEmpty()) {
         val parts = date.split("-")
-        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else "Seleccionar fecha"
+        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else "02/03/2000"
     } else {
-        "Seleccionar fecha"
+        "02/03/2000"
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(55.dp)
-            .background(Color.White, shape = RoundedCornerShape(10.dp))
-            .clickable { showDialog = true }
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterStart
+            .padding(bottom = 16.dp)
     ) {
         Text(
-            text = displayDate,
-            color = if (date.isNotEmpty()) Color.Black else Color.Gray,
-            fontSize = 16.sp
+            text = label,
+            color = AzulClaro,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color(0xFFA3CFE3))
+                .clickable { showDialog = true }
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = displayDate,
+                color = if (date.isNotEmpty()) Color.Black else Color.Gray,
+                fontSize = 16.sp
+            )
+        }
     }
 }
+

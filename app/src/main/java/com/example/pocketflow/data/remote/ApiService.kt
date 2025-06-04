@@ -70,4 +70,18 @@ interface ApiService {
     @PUT("/api/perfil/actualizar-correo")
     suspend fun actualizarCorreo(@Body request: ActualizarCorreoRequest): retrofit2.Response<Void>
 
+    //Predicciones
+    @GET("/api/api/predicciones/{id_usuario}")
+    suspend fun obtenerPredicciones(
+        @Path("id_usuario") idUsuario: String?,
+        @Query("periodo") periodo: String // "semana", "mes", "anio"
+    ): List<Prediccion>
+
+    // En ApiService.kt
+    @POST("api/login/verificar-correo")
+    suspend fun verificarCorreo(@Body request: VerificarCorreoRequest): Response<Map<String, Boolean>>
+
+    @POST("api/login/cambiar-contrasena")
+    suspend fun cambiarContrasena(@Body request: CambiarContrasenaRequest): Response<Unit>
+
 }
